@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.20.4"
+__generated_with = "0.21.1"
 app = marimo.App(width="medium")
 
 
@@ -116,15 +116,12 @@ def _(principal, rate, years):
 
 @app.cell(hide_code=True)
 def _(growth, mo, rate, years):
-    mo.md(
-        f"""
-        ## Compute one scenario
+    mo.md(f"""
+    ## Compute one scenario
 
-        After **{years} years** at **{rate:.0%}**, the account grows to
-        **${growth[-1]:,.2f}**.
-
-        """
-    )
+    After **{years} years** at **{rate:.0%}**, the account grows to
+    **${growth[-1]:,.2f}**.
+    """)
     return
 
 
@@ -143,14 +140,6 @@ def _(growth, plt, years):
 def _(mo):
     mo.md(r"""
     ## Keep the comparison table in sync
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""
- 
     """)
     return
 

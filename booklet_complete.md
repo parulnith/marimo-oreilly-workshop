@@ -242,6 +242,104 @@ marimo was also inspired by Observable (for JavaScript) — part of a broader mo
 
 marimo is entirely free and open source: [github.com/marimo-team/marimo](https://github.com/marimo-team/marimo)
 
+#### Installing marimo
+
+There are several ways to get started:
+
+**In the browser (zero install):**
+
+Visit [marimo.new](https://marimo.new) to open a new notebook in molab, marimo's free cloud-hosted service. No installation needed.
+
+**With pip:**
+
+```bash
+pip install marimo
+marimo tutorial intro     # verify it works
+```
+
+With recommended extras (AI features, plotting, formatting):
+
+```bash
+pip install "marimo[recommended]"
+```
+
+**With uv:**
+
+```bash
+uv venv
+uv pip install marimo
+uv run marimo edit
+```
+
+**Per-notebook sandbox (isolated dependencies):**
+
+```bash
+marimo edit --sandbox notebook.py
+```
+
+This creates an isolated virtual environment for the notebook. Packages are tracked in the notebook file itself.
+
+Before jumping into your own notebooks, it is useful to open the official intro notebook once:
+
+```bash
+marimo tutorial intro
+```
+
+This gives you a quick tour of the marimo editor and lets you point out the main pieces of the interface in a concrete way:
+
+- a code cell and its output
+- the run controls for a cell
+- the sidebar panels
+- the variables view
+- the dependency graph
+- the difference between editing code and interacting with outputs
+
+For teaching, this is a good warm-up before opening the workshop notebooks, because you can explain what each part of the environment does before introducing the course-specific examples.
+
+#### Essential Commands
+
+| Command | What it does |
+|---|---|
+| `marimo.new` | Opens a new notebook in molab (browser, zero install) |
+| `marimo edit` | Opens the file browser to pick or create a notebook |
+| `marimo edit notebook.py` | Opens (or creates) a specific notebook |
+| `marimo edit --sandbox notebook.py` | Same, with isolated per-notebook dependencies |
+| `marimo run notebook.py` | Runs the notebook as a read-only app (code hidden) |
+| `python notebook.py` | Executes the notebook as a script (no UI) |
+
+#### The Editor Interface
+
+When you open a marimo notebook, you'll see:
+
+**Cell area (center)** — Where your code lives. Each cell is independent. Output renders directly below. Hover over a cell to see its controls: run, add, delete, move, hide code.
+
+**Keyboard shortcuts:**
+
+- `Ctrl/Cmd + Enter` — run the current cell
+- `Shift + Enter` — run and move to the next cell
+
+**Cell status indicators:**
+
+- Green — up to date
+- Yellow — stale (inputs changed, needs re-run; only in lazy mode)
+- Red — error
+- Spinner — currently running
+
+**Sidebar panels (right side):**
+
+- **Variables** — Every variable in your notebook: which cell defines it, its type, current value. The "no hidden state" guarantee, made visible.
+- **Dependency graph** — The actual DAG. Cells are nodes, variable references are edges. Click a node to jump to that cell.
+- **Live Docs** — Hover over a function, see its docstring, parameters, and examples. No need for `help()`.
+- **Package management** — Import a missing package, marimo prompts you to install with a click.
+- **Logs** — Print statements and execution logs.
+
+**Edit mode vs. App mode:**
+
+- **Edit mode** — The default. Full editing capability, code visible.
+- **App mode** — Toggle in the editor or run `marimo run notebook.py` from the CLI. Code is hidden. Only outputs and UI elements are visible. Your notebook becomes an interactive web app — zero code changes needed.
+
+At this point in a live session, it is useful to show participants how to run a cell, how outputs appear below the cell, and what the sidebar panels expose. Once they have seen the mechanics, the deeper ideas land much more easily.
+
 #### How It Works: The DAG
 
 Every marimo notebook is modeled as a **directed acyclic graph (DAG)** on cells. marimo reads your code using static analysis — without running it — and determines what each cell defines and what it references. From there, it builds a dependency graph.
@@ -260,6 +358,48 @@ When you delete a cell:
 2. Dependent cells are invalidated immediately
 
 It's like a spreadsheet: change a cell and the formulas update. The dependency graph is the thing that makes everything else possible — reactivity, no hidden state, deterministic execution, and the ability to run notebooks as apps or scripts.
+
+#### A Quick UI Demo
+
+Before moving into the workshop notebooks, it can be helpful to show a few UI elements in a tiny marimo notebook so participants see that interactivity is built directly into the Python workflow:
+
+```python
+import marimo as mo
+
+model = mo.ui.dropdown(
+    options=["Logistic Regression", "Random Forest", "XGBoost"],
+    value="Random Forest",
+    label="Model",
+)
+threshold = mo.ui.slider(start=0.1, stop=0.9, step=0.1, value=0.5, label="Decision threshold")
+split = mo.ui.dropdown(
+    options=["Train", "Validation", "Test"],
+    value="Validation",
+    label="Dataset split",
+)
+
+mo.vstack([model, threshold, split])
+```
+
+Then, in a second cell:
+
+```python
+mo.md(
+    f"""
+    Evaluating **{model.value}** on the **{split.value}** split
+    with a decision threshold of **{threshold.value:.1f}**.
+    """
+)
+```
+
+This is a useful live demo because it lets you quickly point out several things at once:
+
+- UI elements are ordinary Python objects
+- their current values are available through `.value`
+- downstream cells update automatically when inputs change
+- the notebook can feel like an app without any callback wiring
+
+You do not need to dwell on every widget. The point is just to make the environment feel tangible before diving back into the larger examples.
 
 #### No Magic Commands
 
@@ -337,89 +477,35 @@ This makes marimo notebooks self-documenting — code, results, and explanation 
 
 To keep the dependency graph clean, marimo enforces two rules:
 
-1. **No duplicate variable names across cells.** If two cells both define `x`, the graph would be ambiguous. marimo shows an error immediately.
-2. **No cycles between cells.** If cell A depends on cell B and cell B depends on cell A, that's a cycle. marimo prevents it.
+1. **No duplicate variable names across cells.** For example, if one cell says:
+
+```python
+x = 10
+```
+
+and another cell says:
+
+```python
+x = 20
+```
+
+then downstream cells would not know which `x` to use. marimo shows an error immediately instead of allowing that ambiguity.
+
+2. **No cycles between cells.** For example, if one cell says:
+
+```python
+a = b + 1
+```
+
+and another says:
+
+```python
+b = a + 1
+```
+
+then neither cell can run first. That creates a cycle, and marimo prevents it.
 
 These constraints have a small learning curve but are easy to understand. And they encourage you to write functional, well-structured code — which is good practice regardless.
-
-#### Installing marimo
-
-There are several ways to get started:
-
-**In the browser (zero install):**
-
-Visit [marimo.new](https://marimo.new) to open a new notebook in molab, marimo's free cloud-hosted service. No installation needed.
-
-**With pip:**
-
-```bash
-pip install marimo
-marimo tutorial intro     # verify it works
-```
-
-With recommended extras (AI features, plotting, formatting):
-
-```bash
-pip install "marimo[recommended]"
-```
-
-**With uv:**
-
-```bash
-uv venv
-uv pip install marimo
-uv run marimo edit
-```
-
-**Per-notebook sandbox (isolated dependencies):**
-
-```bash
-marimo edit --sandbox notebook.py
-```
-
-This creates an isolated virtual environment for the notebook. Packages are tracked in the notebook file itself.
-
-#### Essential Commands
-
-| Command | What it does |
-|---|---|
-| `marimo.new` | Opens a new notebook in molab (browser, zero install) |
-| `marimo edit` | Opens the file browser to pick or create a notebook |
-| `marimo edit notebook.py` | Opens (or creates) a specific notebook |
-| `marimo edit --sandbox notebook.py` | Same, with isolated per-notebook dependencies |
-| `marimo run notebook.py` | Runs the notebook as a read-only app (code hidden) |
-| `python notebook.py` | Executes the notebook as a script (no UI) |
-
-#### The Editor Interface
-
-When you open a marimo notebook, you'll see:
-
-**Cell area (center)** — Where your code lives. Each cell is independent. Output renders directly below. Hover over a cell to see its controls: run, add, delete, move, hide code.
-
-**Keyboard shortcuts:**
-
-- `Ctrl/Cmd + Enter` — run the current cell
-- `Shift + Enter` — run and move to the next cell
-
-**Cell status indicators:**
-
-- Green — up to date
-- Yellow — stale (inputs changed, needs re-run; only in lazy mode)
-- Red — error
-- Spinner — currently running
-
-**Sidebar panels (right side):**
-
-- **Variables** — Every variable in your notebook: which cell defines it, its type, current value. The "no hidden state" guarantee, made visible.
-- **Dependency graph** — The actual DAG. Cells are nodes, variable references are edges. Click a node to jump to that cell.
-- **Live Docs** — Hover over a function, see its docstring, parameters, and examples. No need for `help()`.
-- **Package management** — Import a missing package, marimo prompts you to install with a click.
-- **Logs** — Print statements and execution logs.
-
-**Edit mode vs. App mode:**
-
-- **Edit mode** — The default. Full editing capability, code visible.
-- **App mode** — Toggle in the editor or run `marimo run notebook.py` from the CLI. Code is hidden. Only outputs and UI elements are visible. Your notebook becomes an interactive web app — zero code changes needed.
 
 #### The .py File Format
 
@@ -469,15 +555,21 @@ To solidify these concepts, try the following:
 
 **Exercise 1: Basic reactivity.** Create three cells: one defining `a = 10`, one defining `b = 20`, one computing `c = a + b`. Change `a` to 50. Watch `c` update without re-running it.
 
-**Exercise 2: Add a slider.** Replace the `a` cell with:
+**Exercise 2: Add a reactive UI input.** Replace the `a` cell with:
 
 ```python
 import marimo as mo
-a = mo.ui.slider(1, 100, value=10, label="Value of a")
-a
+threshold = mo.ui.slider(
+    start=0.1,
+    stop=0.9,
+    step=0.1,
+    value=0.5,
+    label="Decision threshold",
+)
+threshold
 ```
 
-Update the third cell to use `a.value`. Scrub the slider. Watch everything react — no callbacks, no event handlers.
+Update the third cell to use `threshold.value`. Move the slider. Watch everything react — no callbacks, no event handlers.
 
 **Exercise 3: Try to break it.** Define `a` in two different cells. marimo shows an error immediately. In Jupyter, this would silently work.
 

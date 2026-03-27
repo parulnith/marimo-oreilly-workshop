@@ -38,6 +38,14 @@ marimo tutorial intro
 
 If that works, marimo is installed correctly.
 
+Before opening the workshop files, start with the official intro notebook:
+
+```bash
+marimo tutorial intro
+```
+
+This is a good way to quickly see the main parts of the marimo interface before moving into the course materials.
+
 ## Clone the workshop repository
 
 Once marimo is installed, clone the workshop repository and move into it.
@@ -116,6 +124,17 @@ marimo run Module_1/marimo-reactive-workflow-with-sliders.py
 Use script mode when you want to execute a notebook as normal Python:
 
 ```bash
+python Module_1/marimo-reactive-workflow.py
+```
+
+## First commands to try
+
+After cloning the repo and installing marimo, these are good first checks:
+
+```bash
+marimo tutorial intro
+marimo edit Module_1/marimo-reactive-workflow.py
+marimo run Module_1/marimo-reactive-workflow-with-sliders.py
 python Module_1/marimo-reactive-workflow.py
 ```
 

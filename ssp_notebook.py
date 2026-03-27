@@ -323,7 +323,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(f"""
     This notebook, titled **"Be Your Own Red Teamer: Safety Alignment via Self-Play and Reflective Experience Replay,"** is an interactive demonstration of an AI safety technique. Here's a breakdown of what it contains:
