@@ -38,6 +38,37 @@ marimo tutorial intro
 
 If that works, marimo is installed correctly.
 
+## Clone the workshop repository
+
+Once marimo is installed, clone the workshop repository and move into it.
+
+```bash
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+```
+
+If you want the virtual environment inside the repo folder, you can create and activate it there before installing marimo.
+
+### Mac / Linux
+
+```bash
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+python3 -m venv .venv
+source .venv/bin/activate
+pip install marimo
+```
+
+### Windows PowerShell
+
+```powershell
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install marimo
+```
+
 ## Optional: install with `uv`
 
 `uv` is a faster Python environment and package tool. If you already use it, you can install marimo this way instead.
@@ -47,8 +78,8 @@ If that works, marimo is installed correctly.
 ```bash
 uv venv
 source .venv/bin/activate
-uv add marimo
-uv run marimo tutorial intro
+uv pip install marimo
+marimo tutorial intro
 ```
 
 ### Windows PowerShell
@@ -56,11 +87,11 @@ uv run marimo tutorial intro
 ```powershell
 uv venv
 .venv\Scripts\Activate.ps1
-uv add marimo
-uv run marimo tutorial intro
+uv pip install marimo
+marimo tutorial intro
 ```
 
-You may also see `uvx` in the marimo docs. `uvx` is for quickly running a tool without installing it into your project. For this workshop, `pip` or `uv` is easier.
+You may also see `uvx` in the marimo docs. `uvx` is for quickly running a tool without installing it into your project. For this workshop, `pip` or `uv pip install` is easier.
 
 ## Open the workshop notebooks
 
