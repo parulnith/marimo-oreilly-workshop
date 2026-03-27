@@ -152,3 +152,6 @@ __marimo__/
 *.pyc
 *.pyo
 **/__pycache__/
+
+# Local assistant instructions
+CLAUDE.md
