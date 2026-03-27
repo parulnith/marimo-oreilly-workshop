@@ -25,7 +25,7 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Section 1.3b — The Same Workflow, Now With Sliders
+    # The Same Workflow, Now With Sliders
 
     This notebook takes the exact same compound-interest workflow and connects the inputs to UI controls.
 
@@ -40,7 +40,7 @@ def _(mo):
     mo.md(r"""
     ## Choose the inputs interactively
 
-    These sliders replace the fixed variables from `1.3.py`.
+    These sliders replace the fixed variables from `marimo-reactive-workflow.py`.
     """)
     return
 
@@ -81,7 +81,6 @@ def _(mo, principal_slider, rate_slider, years_slider):
         ],
         gap=1.0,
     )
-
     return
 
 

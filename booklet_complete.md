@@ -188,7 +188,7 @@ The result: your code and outputs are always in sync. No stale results. No ghost
 
 We rebuild the same compound interest calculator — the exact same logic — in a reactive notebook. But we do it in two stages.
 
-First, in `1.3.py`, we keep the inputs as plain Python variables:
+First, in `marimo-reactive-workflow.py`, we keep the inputs as plain Python variables:
 
 ```python
 principal = 1000
@@ -200,7 +200,7 @@ Then we use those variables in downstream cells exactly as before: compute the g
 
 The difference is that marimo now knows the dependency graph. Change `years` from 20 to 50 and run that cell, and every dependent cell updates automatically. No stale plot. No stale table. No stale printed summary.
 
-Only after that do we swap the fixed inputs for sliders in `1.3b.py`:
+Only after that do we swap the fixed inputs for sliders in `marimo-reactive-workflow-with-sliders.py`:
 
 - Move the **rate slider** from 7% to 12% — the results table, the growth plot, and the rate comparison chart all update instantly
 - Move the **years slider** from 20 to 50 — everything recomputes automatically

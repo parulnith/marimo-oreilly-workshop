@@ -1,0 +1,114 @@
+# Install and Run marimo
+
+This is the simplest way to get ready for the workshop.
+
+## Easiest option: use marimo in the browser
+
+If you do not want to install anything locally, open:
+
+[https://molab.marimo.io](https://molab.marimo.io)
+
+You can also start a fresh notebook directly from:
+
+[https://marimo.new](https://marimo.new)
+
+This opens marimo in the browser using Molab.
+
+## Recommended local setup: install with `pip`
+
+If you want to work locally, this is the easiest option for most participants.
+
+### Mac / Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install marimo
+marimo tutorial intro
+```
+
+### Windows PowerShell
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install marimo
+marimo tutorial intro
+```
+
+If that works, marimo is installed correctly.
+
+## Optional: install with `uv`
+
+`uv` is a faster Python environment and package tool. If you already use it, you can install marimo this way instead.
+
+### Mac / Linux
+
+```bash
+uv venv
+source .venv/bin/activate
+uv add marimo
+uv run marimo tutorial intro
+```
+
+### Windows PowerShell
+
+```powershell
+uv venv
+.venv\Scripts\Activate.ps1
+uv add marimo
+uv run marimo tutorial intro
+```
+
+You may also see `uvx` in the marimo docs. `uvx` is for quickly running a tool without installing it into your project. For this workshop, `pip` or `uv` is easier.
+
+## Open the workshop notebooks
+
+### Edit mode
+
+Use edit mode when you want the full marimo editor:
+
+```bash
+marimo edit Module_1/marimo-reactive-workflow.py
+```
+
+### App mode
+
+Use app mode when you want to run a notebook with the code hidden:
+
+```bash
+marimo run Module_1/marimo-reactive-workflow-with-sliders.py
+```
+
+### Script mode
+
+Use script mode when you want to execute a notebook as normal Python:
+
+```bash
+python Module_1/marimo-reactive-workflow.py
+```
+
+## Sandbox mode
+
+Later in the workshop, we will use sandbox mode for reproducibility:
+
+```bash
+marimo edit --sandbox notebook.py
+```
+
+This gives a notebook its own isolated environment.
+
+## Workshop files in Module 1
+
+- `jupyter-notebook-failure-modes.ipynb`
+- `marimo-reactive-workflow.py`
+- `marimo-reactive-workflow-with-sliders.py`
+
+## One thing to remember
+
+In marimo, notebooks are plain Python files ending in `.py`.  
+The same file can be:
+
+- edited interactively
+- run as an app
+- executed as a script
