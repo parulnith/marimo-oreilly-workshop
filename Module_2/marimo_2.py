@@ -6,7 +6,7 @@ app = marimo.App()
 
 @app.cell
 def _():
-    a = 10
+    a = 30
     return (a,)
 
 
