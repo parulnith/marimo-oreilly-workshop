@@ -14,7 +14,7 @@ You can also start a fresh notebook directly from:
 
 This opens marimo in the browser using Molab.
 
-## Recommended local setup: install with `pip`
+## local setup: install with `pip`
 
 If you want to work locally, this is the easiest option for most participants.
 
@@ -24,7 +24,6 @@ If you want to work locally, this is the easiest option for most participants.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install marimo
-marimo tutorial intro
 ```
 
 ### Windows PowerShell
@@ -33,7 +32,6 @@ marimo tutorial intro
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install marimo
-marimo tutorial intro
 ```
 
 If that works, marimo is installed correctly.

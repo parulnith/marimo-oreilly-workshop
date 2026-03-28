@@ -244,57 +244,111 @@ marimo is entirely free and open source: [github.com/marimo-team/marimo](https:/
 
 #### Installing marimo
 
-There are several ways to get started:
+This is the simplest way to get ready for the workshop.
 
 **In the browser (zero install):**
 
-Visit [marimo.new](https://marimo.new) to open a new notebook in molab, marimo's free cloud-hosted service. No installation needed.
+If you do not want to install anything locally, open:
 
-**With pip:**
+- [https://molab.marimo.io](https://molab.marimo.io)
+- [https://marimo.new](https://marimo.new)
+
+This opens marimo in the browser using Molab.
+
+**Locally with pip:**
+
+If you want to work locally, this is the easiest option for most participants.
+
+Mac / Linux:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install marimo
-marimo tutorial intro     # verify it works
 ```
 
-With recommended extras (AI features, plotting, formatting):
+Windows PowerShell:
 
-```bash
-pip install "marimo[recommended]"
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install marimo
 ```
 
-**With uv:**
+If that works, marimo is installed correctly.
 
-```bash
-uv venv
-uv pip install marimo
-uv run marimo edit
-```
-
-**Per-notebook sandbox (isolated dependencies):**
-
-```bash
-marimo edit --sandbox notebook.py
-```
-
-This creates an isolated virtual environment for the notebook. Packages are tracked in the notebook file itself.
-
-Before jumping into your own notebooks, it is useful to open the official intro notebook once:
+Before opening the workshop files, start with the official intro notebook:
 
 ```bash
 marimo tutorial intro
 ```
 
-This gives you a quick tour of the marimo editor and lets you point out the main pieces of the interface in a concrete way:
+This is a good way to quickly see the main parts of the marimo interface before moving into the course materials.
 
-- a code cell and its output
-- the run controls for a cell
-- the sidebar panels
-- the variables view
-- the dependency graph
-- the difference between editing code and interacting with outputs
+**Clone the workshop repository:**
 
-For teaching, this is a good warm-up before opening the workshop notebooks, because you can explain what each part of the environment does before introducing the course-specific examples.
+Once marimo is installed, clone the workshop repository and move into it.
+
+```bash
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+```
+
+If you want the virtual environment inside the repo folder, you can create and activate it there before installing marimo.
+
+Mac / Linux:
+
+```bash
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+python3 -m venv .venv
+source .venv/bin/activate
+pip install marimo
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install marimo
+```
+
+**Optional: install with uv**
+
+`uv` is a faster Python environment and package tool. If you already use it, you can install marimo this way instead.
+
+Mac / Linux:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install marimo
+marimo tutorial intro
+```
+
+Windows PowerShell:
+
+```powershell
+uv venv
+.venv\Scripts\Activate.ps1
+uv pip install marimo
+marimo tutorial intro
+```
+
+You may also see `uvx` in the marimo docs. `uvx` is for quickly running a tool without installing it into your project. For this workshop, `pip` or `uv pip install` is easier.
+
+**Per-notebook sandbox (isolated dependencies):**
+
+Later in the workshop, we will use sandbox mode for reproducibility:
+
+```bash
+marimo edit --sandbox notebook.py
+```
+
+This gives a notebook its own isolated environment.
 
 #### Essential Commands
 
@@ -302,10 +356,10 @@ For teaching, this is a good warm-up before opening the workshop notebooks, beca
 |---|---|
 | `marimo.new` | Opens a new notebook in molab (browser, zero install) |
 | `marimo edit` | Opens the file browser to pick or create a notebook |
-| `marimo edit notebook.py` | Opens (or creates) a specific notebook |
+| `marimo edit Module_1/marimo-reactive-workflow.py` | Opens a specific workshop notebook in the editor |
 | `marimo edit --sandbox notebook.py` | Same, with isolated per-notebook dependencies |
-| `marimo run notebook.py` | Runs the notebook as a read-only app (code hidden) |
-| `python notebook.py` | Executes the notebook as a script (no UI) |
+| `marimo run Module_1/marimo-reactive-workflow-with-sliders.py` | Runs a notebook as a read-only app (code hidden) |
+| `python Module_1/marimo-reactive-workflow.py` | Executes a notebook as a script (no UI) |
 
 #### The Editor Interface
 
@@ -589,71 +643,85 @@ That's the subject of Module 2: **Reproducibility as a Baseline for Trustworthy 
 
 ## Module 2: Reproducibility as a Baseline for Trustworthy AI
 
-There's a big difference between just running your code again and reliably getting the same results across different computers and over time. Reactive execution — as you saw in Module 1 — keeps your outputs in sync *within a session*. But the moment you close your notebook, share it with a colleague, or come back to it six months later, an entirely different class of problems emerges. This module is about those problems, and how marimo addresses them at the environment level.
+There's a big difference between just running your code again and reliably getting the same results across different computers and over time. Running code again just means pressing a button. Reproducibility means that anyone — on any machine, at any point in the future — gets the same result from the same code. That guarantee is hard to achieve and easy to lose, and losing it is particularly costly in AI work where the output of your notebook is a model or a metric that others will rely on.
+
+This module covers where reproducibility breaks down, what causes it, and how marimo addresses it directly — through environment pinning, pure-Python file format, and consistent execution wherever Python runs.
 
 ---
 
 ### 2.1 The "It Works on My Machine" Problem
 
-Imagine you spend a week building a data pipeline. It runs cleanly on your laptop. You send it to a colleague. They run it and get different numbers — or it crashes entirely. You compare code. It's identical. The problem isn't the code. It's everything around the code.
+*While reproducibility is essential in building trust, it needs to be built into the environment itself. This section explains exactly why that's the case.*
 
-This is the "it works on my machine" problem, and it's endemic to data science and ML work. The reason it's so insidious is that it fails *silently*. Your notebook doesn't raise an exception when it produces a subtly wrong result due to a library version mismatch. It just runs, outputs something, and you trust it.
+You write notebook code, it runs cleanly on your machine, and you send it to a colleague. They run the same code in a slightly different environment and get a different result — or the code fails entirely. The problem is not the notebook logic. The problem is everything around it.
 
-The Pimentel study from Module 1 captured this at scale: of 1.4 million Jupyter notebooks on GitHub, only 4% reproduced their original results when re-run. The majority of those failures weren't bugs in the code — they were environmental drift. Different Python versions. Different library versions. Different system configurations. Code that was never wrong, running in an environment that no longer matches the one it was written for.
+That is environmental drift: the code is correct, the library is correct, but the *combination* running on your machine is not the same combination running on theirs.
 
-This is why reproducibility can't be an afterthought bolted on after the fact with a `requirements.txt` file. It needs to be built into the environment itself, from the first line of code.
+The Pimentel study from Module 1 measured this at scale: of 1.4 million Jupyter notebooks on GitHub, only 4% reproduced their original results when re-run. The majority of those failures were not bugs. They were environmental drift — different library versions, different Python versions, different default parameters. Code that was never wrong, running in a context that no longer matched the one it was written for.
+
+The standard response is to share a `requirements.txt`. But a `requirements.txt` is a separate file you maintain by hand. You add a library, forget to update the file, and the spec is already stale. It also says nothing about Python version, system libraries, or the dozens of transitive dependencies that come along for the ride.
+
+This is why reproducibility can't be bolted on after the fact. The environment needs to be part of the artifact itself — inseparable from the code, versioned alongside it, automatically applied whenever anyone opens the file.
 
 #### Try it: make the problem visible
 
-The best way to understand environmental drift is to create it deliberately. The `2.1.ipynb` notebook is set up to do exactly that by running the same cell in two different kernels.
+Open `Module_2/2.1.ipynb`. It has two examples.
 
-**Step 1.** Open `Module_2/2.1.ipynb` and run this cell in the default kernel:
+**Example 1 — scikit-learn 1.8 feature change.** Run the first code cell in one environment, then run the same cell again in the other environment.
+
+The code uses `CalibratedClassifierCV(method="temperature")`, a feature that exists in scikit-learn `1.8.0` but not in `1.7.2`.
+
+- In scikit-learn `1.8.0`, the code should run.
+- In scikit-learn `1.7.2`, it should fail because `temperature` calibration is not available.
+
+Same code. Different environment. Different outcome.
+
+**Example 2 — pandas API change.** Run the second code cell in your current environment, then run the same cell again in `Python 3.10 + pandas 1.5.3 (Module 2)`.
 
 ```python
+from io import StringIO
 import pandas as pd
 
-print(f"pandas version: {pd.__version__}")
+csv_data = """feature_a feature_b label
+1 10 0
+2 20 1
+3 30 0
+"""
 
-df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
-df['b'][df['a'] > 1] = 99
-
+df = pd.read_csv(StringIO(csv_data), delim_whitespace=True)
 print(df)
 ```
 
-Note whether `df` was modified and what signal appeared.
+Compare:
 
-**Step 2.** Switch the notebook kernel to:
-
-```bash
-Python 3.10 + pandas 1.5.3 (Module 2)
-```
-
-Run the same cell again. Compare:
-
-| | pandas 1.x | pandas 2.x |
+| | pandas 1.x | pandas 3.x |
 |---|---|---|
-| `df` after assignment | **is modified** | **not modified** |
-| Signal shown | usually no exception | `ChainedAssignmentError` message |
+| `delim_whitespace=True` | works | raises an error |
+| signal | no issue | tells you to use `sep=r"\s+"` instead |
 
-The code is byte-for-byte identical. In pandas 1.x, chained assignment can silently overwrite your original dataframe. In pandas 2.x, Copy-on-Write blocks the mutation entirely. Same code. Different data. This is environmental drift.
+The code is identical, but the API changed. In pandas 3.0, the deprecated `delim_whitespace` argument was removed from `read_csv()`.
+
+Two failure modes, one pattern: same code, different environment, different outcome, no signal.
 
 ---
 
 ### 2.2 The Hidden Culprits: Dependencies and Environments
 
-The most common sources of environmental drift are ones you don't think about while you're working, because they're invisible:
+*Your libraries, system settings, and how your code runs all impact your results. This section shows why these factors need to be clearly defined and controlled.*
 
-**Library versions** are the biggest offender. `pandas` changed how `groupby` handles `NaN` values between versions. `scikit-learn` changed default parameters in estimators between major releases. `numpy` changed random number generation behaviour. Code that produces correct results on version X may silently produce different results on version Y — no error, no warning, just different numbers.
+Environmental drift has three main sources, and all three are invisible while you're working:
 
-**Python itself** is a dependency. Code written for Python 3.9 may behave differently on 3.11. Some libraries drop support for older versions; others introduce subtle behavioural changes.
+**Library versions** are the most common offender. scikit-learn changes default parameters between releases. pandas changes how it handles missing values. numpy changes its random number generation API. These are not bugs — they are deliberate improvements — but any one of them can cause the same code to produce different results on different machines without raising an error.
 
-**Transitive dependencies** — the libraries your libraries depend on — are largely invisible. You install `torch` and get dozens of packages pinned to specific versions. Update one and the chain can shift in unpredictable ways.
+**Python itself** is a dependency. Code written for Python 3.9 may behave differently on 3.12. Some libraries drop support for older Python versions; others introduce subtle behavioural changes across releases. The Python version is invisible in a `requirements.txt`.
 
-The standard solution is a `requirements.txt` or `pyproject.toml` file that lists your dependencies. But this approach has a fundamental flaw: it's a separate file that you have to manually maintain, and it drifts. You add a library to your notebook, forget to add it to `requirements.txt`, and the file is stale before the day is out.
+**Transitive dependencies** — the libraries your libraries depend on — are largely invisible. Install `torch` and you pull in dozens of packages, each pinned to a range of compatible versions. Update one and the chain shifts in ways that are hard to predict and harder to debug.
+
+The standard solution is a `requirements.txt` or `pyproject.toml`. But this is a separate file you maintain by hand, and it drifts. You add a library to your notebook, forget to update the spec, and it is stale before the day is out. It also doesn't capture Python version, and it doesn't travel automatically with the notebook when you share it.
 
 #### How marimo solves this: inline dependencies
 
-marimo takes a different approach. When you run a notebook with the `--sandbox` flag, marimo tracks your dependencies *inside the notebook file itself*. When you import a library, marimo prompts you to install it — and records that package and its exact version directly as metadata in the `.py` file, in a format called inline script metadata.
+marimo takes a different approach. When you run a notebook with the `--sandbox` flag, marimo uses `uv` under the hood to create an isolated environment for that file. It stores the notebook's Python requirement and dependencies directly in the `.py` file itself, in a format called inline script metadata. When you import a missing library, marimo prompts you to install it and updates that metadata block for you.
 
 The result looks like this at the top of your notebook file:
 
@@ -668,22 +736,35 @@ The result looks like this at the top of your notebook file:
 # ///
 ```
 
-This block travels with the file. The next time anyone opens this notebook — on any machine, at any point in the future — marimo reads this block and automatically rebuilds the exact same isolated environment before running a single cell. No `pip install`. No `requirements.txt`. No "which version did you have?" The notebook *is* the environment spec.
+This block travels with the file. The next time anyone opens this notebook in sandbox mode, marimo reads the metadata block and uses it to rebuild an isolated environment before running a single cell. No separate `requirements.txt`. No second file to keep in sync. The notebook and the environment specification travel together.
 
-This means the dependency problem goes from something you manage manually and separately to something marimo handles automatically and atomically. The notebook and its environment are a single artifact.
+This means the dependency problem goes from something you manage manually and separately to something marimo handles automatically and atomically in the sandbox workflow. The notebook and its environment spec become a single artifact.
 
 #### Try it: watch the notebook inspect its own environment spec
 
 Open `Module_2/2.2.py` in marimo. This notebook demonstrates the environment story from inside the notebook itself.
 
-**Step 1.** Run the notebook and inspect the current runtime. It shows:
+**Step 1.** Run the notebook and inspect the current runtime. It shows the active Python, `pandas`, and `matplotlib` versions.
 
-- the notebook filename
-- the current Python version
-- the Python version required by the file
-- the loaded versions of `pandas` and `matplotlib`
+**Step 2.** The notebook then runs the same `pandas` example from `2.1.ipynb`:
 
-**Step 2.** Look at the next cell. The notebook reads its own `# /// script` block from disk and displays it directly in the UI:
+```python
+from io import StringIO
+import pandas as pd
+
+csv_data = """feature_a feature_b label
+1 10 0
+2 20 1
+3 30 0
+"""
+
+df = pd.read_csv(StringIO(csv_data), delim_whitespace=True)
+print(df)
+```
+
+The point is not that marimo magically prevents library changes. The point is that marimo gives you a clean way to pin the environment that this code is supposed to run in.
+
+**Step 3.** Look at the next cell. The notebook reads its own `# /// script` block from disk and displays it directly in the UI:
 
 ```python
 # /// script
@@ -696,8 +777,6 @@ Open `Module_2/2.2.py` in marimo. This notebook demonstrates the environment sto
 # ///
 ```
 
-**Step 3.** Run the comparison cell below it. The notebook checks that the pinned versions in the metadata match the versions loaded in the active runtime.
-
 **Step 4.** Now reopen the notebook in sandbox mode:
 
 ```bash
@@ -706,11 +785,15 @@ marimo edit --sandbox Module_2/2.2.py
 
 Add a new import such as `import scipy`, run the cell, approve the installation, and then look back at the top of the file. marimo updates the `# /// script` block automatically. The environment spec lives in the same file as the notebook logic.
 
+One important nuance: this behavior is specific to sandbox mode. If you run the notebook inside a manually managed virtual environment, editing the metadata block at the top of the file does not automatically reconfigure that environment. In a regular `.venv`, the block is metadata until you actually install matching packages yourself. In `--sandbox`, marimo uses that metadata to build and manage the environment.
+
 ---
 
 ### 2.3 Version Control and Reviewable Experiments
 
-Solving the environment problem is necessary but not sufficient. You also need to be able to track how your work changes over time, collaborate with others, and run the same notebook consistently across your local machine, a CI/CD pipeline, and the cloud. This is where marimo's file format becomes the second pillar of reproducibility.
+*Your work should behave identically whether you're running it on your own machine, in a code editor, or in the cloud. This section explores how to achieve that kind of consistent behaviour.*
+
+Pinning your dependencies solves the environment problem. But reproducibility also requires that you can track how your work changes over time, review it alongside your codebase, and run it consistently on any infrastructure — local, editor-integrated, or cloud. marimo's pure-Python file format makes all three possible without extra tooling.
 
 #### Pure Python means real version control
 
@@ -771,114 +854,60 @@ It's readable, diffable, and runnable as-is. Change one cell and the diff is exa
 
 #### Try it: let the notebook show you the diff
 
-Open `Module_2/2.3.py` in marimo. This notebook makes the file-format argument concrete from inside the notebook.
+Open the same `Module_2/2.2.py` notebook in marimo. The notebook makes the file-format argument from inside itself.
 
-**Step 1.** Run the notebook. One cell reads the notebook's own `.py` source and displays the exact excerpt containing:
-
-```python
-x = 10
-print(x)
-```
-
-**Step 2.** The next cell computes the hypothetical change from `x = 10` to `x = 20` and renders the unified diff directly in the notebook. The key output is:
+**Step 1.** Run the notebook. One cell computes the hypothetical change from `x = 10` to `x = 20` and renders the unified diff inline:
 
 ```diff
 -    x = 10
 +    x = 20
 ```
 
-**Step 3.** Compare that with the representative Jupyter diff shown in the notebook:
+One change in the source. One line in the diff.
+
+**Step 2.** Below that, the notebook shows a representative Jupyter diff for the same change:
 
 ```diff
 -   "execution_count": 1,
 +   "execution_count": 2,
-     "outputs": [
-      {
 -      "text": ["10\n"],
 +      "text": ["20\n"],
-       ...
-      }
 -   "source": ["x = 10\n"]
 +   "source": ["x = 20\n"]
 ```
 
-The point is that the marimo file does not need any notebook-specific tooling to explain itself. It is already plain source code, and the notebook can prove that by reading and diffing its own file.
+The marimo diff is a single line. The Jupyter diff is noise.
 
-#### Running anywhere, consistently
-
-A marimo notebook isn't just reviewable — it's executable as a standard Python script:
+**Step 3.** Run the same file as a plain Python script:
 
 ```bash
-python Module_2/2.3.py
+python Module_2/2.2.py
 ```
 
-This means you can run it in a CI/CD pipeline without any special notebook tooling. You can schedule it as a cron job. You can execute it on a remote server over SSH. Anywhere Python runs, your notebook runs — and because the inline dependencies travel with the file, the environment is always correct.
-
-#### Try it: run your notebook as a script
-
-Take the `2.3.py` notebook and run it directly from the terminal:
-
-```bash
-python Module_2/2.3.py
-```
-
-It executes top to bottom, outputs print to stdout, and exits cleanly — no browser, no kernel, no notebook server. The same file you edited interactively is now a reproducible script you can hand to any Python environment or automation tool.
-
-Combine this with `--sandbox` and the picture is complete: one file, version-controlled, with its environment pinned inside it, executable anywhere.
-
-#### molab: consistent by default in the cloud
-
-For situations where you don't want to manage a local environment at all — or where you need to share work with someone who doesn't have Python installed — marimo offers **molab**, its free cloud-hosted notebook service at [molab.marimo.io](https://molab.marimo.io/notebooks).
-
-molab runs your notebook in a managed cloud environment. There's no local setup, no Python version to worry about, and no environment to configure. Because notebooks run on consistent infrastructure, the "works on my machine" problem doesn't arise — there is no "your machine." You write, run, and share entirely in the browser.
-
-Notebooks on molab are shareable by URL and can be downloaded as `.py`, `.ipynb`, or PDF. If you store notebooks on GitHub, molab can preview them directly via a stable URL that updates as your repository changes — useful for sharing the latest version of an experiment without manually exporting anything.
-
-#### VS Code: marimo in your existing editor
-
-If you prefer working inside VS Code or Cursor rather than the browser-based editor, marimo has a first-class extension available in both marketplaces. The extension brings the full marimo runtime into your existing editor — reactive execution, the dependency graph, the variables panel — without leaving the environment you already use for the rest of your codebase.
-
-This matters for reproducibility in a practical sense: your notebook lives alongside your other project files, opens in the same editor, and is checked into the same repository. There's no context switch between "notebook work" and "real code." It's all the same file, the same tool, the same Git workflow.
-
-The VS Code extension is available in the VS Code and Cursor marketplaces. Search for **marimo** to install it.
-
-#### Try it: open your notebook in VS Code
-
-**Step 1.** Install the marimo extension from the VS Code marketplace (search "marimo").
-
-**Step 2.** Open your project folder in VS Code. Open `Module_2/2.2.py`. You'll see an **"Open as marimo notebook"** button at the top of the file — click it.
-
-**Step 3.** The full marimo editor opens inside VS Code: reactive cells, the variables panel, the dependency graph — everything from the browser editor, inside your existing IDE. Your file is still a `.py` file in your project. You can switch between the notebook view and the raw source with one click.
-
-The key point: this is the same file, the same Git repo, the same workflow. There's no export step, no format conversion, no separate notebook environment to maintain alongside your codebase.
-
-#### JupyterLab and JupyterHub: marimo without leaving your infrastructure
-
-If your team or institution already runs JupyterLab or JupyterHub, you don't have to choose between your existing setup and marimo. The **marimo-jupyter-extension** integrates marimo directly into JupyterLab's launcher — no separate server, no separate URL, no workflow disruption.
-
-Once installed, marimo appears as an option in the JupyterLab launcher alongside regular notebooks. A sidebar panel shows running marimo sessions and lets you manage them. The extension also handles environment selection when creating a new notebook, embedding the chosen Python environment as PEP 723 inline metadata in the file — the same `# /// script` block from section 2.2, set up automatically.
-
-The detail that matters most for teams migrating from Jupyter: right-click any `.ipynb` file in JupyterLab's file browser and you get a **"Convert to marimo"** option. The conversion produces a clean `.py` marimo notebook. From that point on, the file is version-controllable, sandboxable, and executable as a script — everything this module has covered — with no manual rewriting required.
-
-Install it alongside marimo:
-
-```bash
-uv pip install 'marimo[sandbox]>=0.19.11' marimo-jupyter-extension
-```
-
-Then launch JupyterLab as normal. The marimo icon appears in the launcher immediately.
-
-For JupyterHub deployments, the extension works with existing authenticators and spawners. Install `marimo` in each user's environment and `marimo-jupyter-extension` in Jupyter's environment, then configure the marimo path in `jupyterhub_config.py`:
+This works because a marimo notebook is still an ordinary Python file. The file defines cells with decorators, creates a marimo app object, and ends with:
 
 ```python
-# Explicit path
-c.MarimoProxyConfig.marimo_path = "/opt/bin/marimo"
-
-# Or use uvx for sandboxed mode
-c.MarimoProxyConfig.uvx_path = "/usr/local/bin/uvx"
+if __name__ == "__main__":
+    app.run()
 ```
 
-This means an organisation that has invested in JupyterHub infrastructure doesn't have to abandon it to adopt marimo. The two coexist — and over time, as teams convert notebooks and experience the reproducibility guarantees firsthand, the migration happens naturally.
+That means the same file can be used in three ways:
+
+- `marimo edit Module_2/2.2.py` opens the interactive editor
+- `marimo run Module_2/2.2.py` runs it in app mode with code hidden
+- `python Module_2/2.2.py` executes the file as a Python program
+
+In other words, marimo is not inventing a separate notebook file format. It is reusing ordinary Python files, plus modern Python metadata for dependencies.
+
+#### Consistent in the cloud: molab
+
+If you don't want to manage a local environment — or want to share work with someone who doesn't have Python installed — marimo offers **molab**, a free cloud-hosted notebook service. There is no local setup, no Python version to configure, and no environment to maintain. Because all notebooks run on the same infrastructure, the "works on my machine" problem doesn't arise: there is no "your machine." Notebooks are shareable by URL and can be downloaded as `.py`, `.ipynb`, or PDF.
+
+#### Consistent in your editor: VS Code and JupyterLab
+
+marimo has a first-class extension for VS Code and Cursor. The extension brings the full marimo runtime into your existing editor — reactive cells, the variables panel, the dependency graph — without leaving the environment you already use. Your notebook lives alongside your other project files, opens in the same editor, and is checked into the same repository. There is no context switch between "notebook work" and "real code."
+
+If your team runs JupyterLab or JupyterHub, the **marimo-jupyter-extension** integrates marimo directly into the launcher. marimo appears as an option alongside regular notebooks, with environment selection handled automatically via PEP 723 inline metadata — the same `# /// script` block from section 2.2, set at notebook creation time.
 
 ---
 
