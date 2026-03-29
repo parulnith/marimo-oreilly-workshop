@@ -202,6 +202,44 @@
         font-size: 0.9rem;
       }
 
+      .timer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fffcf6;
+      }
+
+      .timer-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .timer-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .timer-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+
+      .timer-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
       @media (max-width: 680px) {
         .wrap {
           padding: 24px 16px 40px;
@@ -241,6 +279,18 @@
 
       <div class="card">
         <h2 class="question" id="question"></h2>
+
+        <div class="timer-row">
+          <div class="timer-copy">
+            <span class="timer-label">Question Timer</span>
+            <span class="timer-value" id="timer-value">5s</span>
+          </div>
+          <div class="timer-controls">
+            <button class="btn-muted" id="start-timer-btn">Start 5s Timer</button>
+            <button class="btn-muted" id="reset-timer-btn">Reset Timer</button>
+          </div>
+        </div>
+
         <div class="options" id="options"></div>
 
         <div class="answer-panel" id="answer-panel">
@@ -333,6 +383,8 @@
       let currentIndex = 0;
       let selectedIndex = null;
       let revealed = false;
+      let timerSeconds = 5;
+      let timerId = null;
 
       const questionEl = document.getElementById("question");
       const optionsEl = document.getElementById("options");
@@ -341,12 +393,41 @@
       const answerTextEl = document.getElementById("answer-text");
       const progressLabelEl = document.getElementById("progress-label");
       const progressBarEl = document.getElementById("progress-bar");
+      const timerValueEl = document.getElementById("timer-value");
 
       const prevBtn = document.getElementById("prev-btn");
       const nextBtn = document.getElementById("next-btn");
       const revealBtn = document.getElementById("reveal-btn");
       const resetBtn = document.getElementById("reset-btn");
       const retakeBtn = document.getElementById("retake-btn");
+      const startTimerBtn = document.getElementById("start-timer-btn");
+      const resetTimerBtn = document.getElementById("reset-timer-btn");
+
+      function stopTimer() {
+        if (timerId !== null) {
+          window.clearInterval(timerId);
+          timerId = null;
+        }
+      }
+
+      function resetTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+      }
+
+      function startTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+        timerId = window.setInterval(() => {
+          timerSeconds -= 1;
+          timerValueEl.textContent = `${timerSeconds}s`;
+          if (timerSeconds <= 0) {
+            stopTimer();
+          }
+        }, 1000);
+      }
 
       function render() {
         const q = questions[currentIndex];
@@ -406,6 +487,7 @@
           currentIndex += 1;
           selectedIndex = null;
           revealed = false;
+          resetTimer();
           render();
         }
       }
@@ -415,6 +497,7 @@
           currentIndex -= 1;
           selectedIndex = null;
           revealed = false;
+          resetTimer();
           render();
         }
       }
@@ -433,6 +516,7 @@
       resetBtn.addEventListener("click", () => {
         selectedIndex = null;
         revealed = false;
+        resetTimer();
         render();
       });
 
@@ -440,8 +524,12 @@
         currentIndex = 0;
         selectedIndex = null;
         revealed = false;
+        resetTimer();
         render();
       });
+
+      startTimerBtn.addEventListener("click", startTimer);
+      resetTimerBtn.addEventListener("click", resetTimer);
 
       document.addEventListener("keydown", (event) => {
         if (event.key === " ") {
@@ -468,6 +556,7 @@
         }
       });
 
+      resetTimer();
       render();
     </script>
   </body>

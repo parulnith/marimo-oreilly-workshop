@@ -202,6 +202,44 @@
         font-size: 0.9rem;
       }
 
+      .timer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fffcf6;
+      }
+
+      .timer-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .timer-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .timer-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+
+      .timer-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
       @media (max-width: 680px) {
         .wrap {
           padding: 24px 16px 40px;
@@ -243,6 +281,18 @@
 
       <div class="card">
         <h2 class="question" id="question"></h2>
+
+        <div class="timer-row">
+          <div class="timer-copy">
+            <span class="timer-label">Question Timer</span>
+            <span class="timer-value" id="timer-value">5s</span>
+          </div>
+          <div class="timer-controls">
+            <button class="btn-muted" id="start-timer-btn">Start 5s Timer</button>
+            <button class="btn-muted" id="reset-timer-btn">Reset Timer</button>
+          </div>
+        </div>
+
         <div class="options" id="options"></div>
 
         <div class="answer-panel" id="answer-panel">
@@ -271,70 +321,72 @@
     <script>
       const questions = [
         {
-          question: "What is environmental drift?",
+          question: "What marimo feature helps keep a notebook's environment isolated and reproducible?",
           options: [
-            "A plotting bug caused by stale outputs",
-            "A change in results caused by changes in the environment around the code",
-            "A marimo-specific package installation failure",
-            "A Git merge conflict in a notebook file",
-          ],
-          answer: 1,
-          explanation:
-            "Environmental drift means the code stays the same, but the Python version, library versions, or system configuration changes, causing different results.",
-        },
-        {
-          question: "What problem is Module 2 mainly trying to solve?",
-          options: [
-            "How to make sliders update more quickly",
-            "How to make notebooks smaller on disk",
-            "How to get the same results across machines and over time",
-            "How to avoid writing helper functions",
-          ],
-          answer: 2,
-          explanation:
-            "Module 2 is about reproducibility beyond a single session: across different computers, environments, and points in time.",
-        },
-        {
-          question: "In marimo, what does --sandbox do?",
-          options: [
-            "It disables reactive execution",
-            "It creates an isolated per-notebook environment",
-            "It exports the notebook as HTML",
-            "It hides the code in app mode",
-          ],
-          answer: 1,
-          explanation:
-            "--sandbox creates an isolated environment for the notebook and lets marimo track dependencies directly in the notebook file.",
-        },
-        {
-          question: "Why are marimo notebooks easier to review in Git than Jupyter notebooks?",
-          options: [
-            "They hide execution counts automatically",
-            "They are stored as plain .py files instead of JSON",
-            "They remove all outputs before saving",
-            "They cannot contain plots or tables",
-          ],
-          answer: 1,
-          explanation:
-            "marimo notebooks are plain Python files, so diffs show actual code changes instead of large JSON blobs full of metadata and outputs.",
-        },
-        {
-          question: "What is one key idea behind marimo's inline dependency metadata?",
-          options: [
-            "The notebook and its environment spec travel together in one file",
-            "Every notebook must share one global virtual environment",
-            "Dependencies are stored only in requirements.txt",
-            "The notebook cannot be run as a script",
+            "`--sandbox`",
+            "`marimo export`",
+            "`git diff`",
+            "`mo.ui.slider`",
           ],
           answer: 0,
           explanation:
-            "marimo stores dependency information directly in the notebook file, so the notebook and its environment specification remain a single artifact.",
+            "`--sandbox` creates an isolated environment for a notebook, which helps keep execution more reproducible across runs.",
+        },
+        {
+          question: "Why are marimo notebooks usually easier to review in Git than `.ipynb` notebooks?",
+          options: [
+            "They are stored as plain Python files",
+            "They never contain outputs",
+            "They cannot use external libraries",
+            "They automatically resolve merge conflicts",
+          ],
+          answer: 0,
+          explanation:
+            "marimo notebooks are plain `.py` files, so diffs focus on readable code changes instead of large notebook JSON blobs.",
+        },
+        {
+          question: "Which command opens a marimo notebook as an interactive notebook in the browser?",
+          options: [
+            "`marimo edit notebook.py`",
+            "`python notebook.py`",
+            "`marimo export html notebook.py`",
+            "`git status notebook.py`",
+          ],
+          answer: 0,
+          explanation:
+            "`marimo edit notebook.py` opens the notebook editor, where the file runs as an interactive notebook.",
+        },
+        {
+          question: "What does `marimo run notebook.py` do differently from `marimo edit notebook.py`?",
+          options: [
+            "It serves the notebook as an app with code hidden",
+            "It converts the notebook into a Jupyter file",
+            "It deletes all outputs before running",
+            "It disables the notebook's dependencies",
+          ],
+          answer: 0,
+          explanation:
+            "`marimo run` serves the notebook like an app, while `marimo edit` opens the editable notebook interface.",
+        },
+        {
+          question: "Why does storing a marimo notebook as `.py` help with version control?",
+          options: [
+            "Code changes are easier to diff without notebook JSON noise",
+            "Git can only track Python files",
+            "Python files cannot contain outputs or markdown",
+            "It prevents all merge conflicts",
+          ],
+          answer: 0,
+          explanation:
+            "Because the notebook is plain Python, the diff is centered on code changes instead of notebook metadata and structural wrappers.",
         },
       ];
 
       let currentIndex = 0;
       let selectedIndex = null;
       let revealed = false;
+      let timerSeconds = 5;
+      let timerId = null;
 
       const questionEl = document.getElementById("question");
       const optionsEl = document.getElementById("options");
@@ -343,12 +395,41 @@
       const answerTextEl = document.getElementById("answer-text");
       const progressLabelEl = document.getElementById("progress-label");
       const progressBarEl = document.getElementById("progress-bar");
+      const timerValueEl = document.getElementById("timer-value");
 
       const prevBtn = document.getElementById("prev-btn");
       const nextBtn = document.getElementById("next-btn");
       const revealBtn = document.getElementById("reveal-btn");
       const resetBtn = document.getElementById("reset-btn");
       const retakeBtn = document.getElementById("retake-btn");
+      const startTimerBtn = document.getElementById("start-timer-btn");
+      const resetTimerBtn = document.getElementById("reset-timer-btn");
+
+      function stopTimer() {
+        if (timerId !== null) {
+          window.clearInterval(timerId);
+          timerId = null;
+        }
+      }
+
+      function resetTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+      }
+
+      function startTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+        timerId = window.setInterval(() => {
+          timerSeconds -= 1;
+          timerValueEl.textContent = `${timerSeconds}s`;
+          if (timerSeconds <= 0) {
+            stopTimer();
+          }
+        }, 1000);
+      }
 
       function render() {
         const q = questions[currentIndex];
@@ -408,6 +489,7 @@
           currentIndex += 1;
           selectedIndex = null;
           revealed = false;
+          resetTimer();
           render();
         }
       }
@@ -417,6 +499,7 @@
           currentIndex -= 1;
           selectedIndex = null;
           revealed = false;
+          resetTimer();
           render();
         }
       }
@@ -435,14 +518,18 @@
       resetBtn.addEventListener("click", () => {
         selectedIndex = null;
         revealed = false;
+        resetTimer();
         render();
       });
       retakeBtn.addEventListener("click", () => {
         currentIndex = 0;
         selectedIndex = null;
         revealed = false;
+        resetTimer();
         render();
       });
+      startTimerBtn.addEventListener("click", startTimer);
+      resetTimerBtn.addEventListener("click", resetTimer);
 
       document.addEventListener("keydown", (event) => {
         if (event.key === " ") {
@@ -469,7 +556,8 @@
         }
       });
 
+      resetTimer();
       render();
     </script>
   </body>
-  </html>
+</html>

@@ -3,14 +3,22 @@
 # dependencies = [
 #     "marimo",
 #     "pandas==2.3.3",
-#     "scikit-learn",
+#     "scikit-learn==1.8.0",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.20.4"
 app = marimo.App(width="medium")
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    [![Open in molab](https://molab.marimo.io/molab-shield.svg)](https://molab.marimo.io/notebooks/nb_NnMhuna1ffVTbUN3sDhmuM)
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -83,6 +91,18 @@ def _():
     """
     df = pd.read_csv(StringIO(csv_data), delim_whitespace=True)
     print(df)
+    return
+
+
+@app.cell
+def _():
+    a = 10
+    return
+
+
+@app.cell
+def _():
+    b = 20
     return
 
 
