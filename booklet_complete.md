@@ -695,302 +695,81 @@ The same `.py` file works in all of them. No conversion, no format mismatch, no 
 
 ## Module 3: Why Interactivity Accelerates AI Discovery
 
-Interactivity isn't a convenience feature. It's a fundamentally different way of thinking about ML work. When your data, your UI controls, your model, and your visualisations are all nodes in the same reactive graph, the feedback loop that drives discovery collapses from minutes to milliseconds. This module shows what that looks like in practice — not as a demo, but as a workflow you build yourself, piece by piece, across three sections that form one continuous notebook.
-
-By the end of section 3.3 you'll have a complete interactive ML pipeline: live data exploration, a state-of-the-art tabular foundation model that updates as you reshape your data, and a visual debugging layer that shows you exactly where and why the model is wrong — all in a single marimo notebook, all reactive, all connected.
-
-The dataset throughout is **Adult Income** — a classic benchmark predicting whether a person earns above $50K based on age, education, occupation, hours worked, and other demographic features. It's rich enough to produce interesting results, familiar enough to reason about intuitively, and raises genuinely important questions about fairness and model behaviour that will become relevant in section 3.3.
+Interactivity is most valuable when it turns a notebook into a single live system: data, controls, models, visualizations, and selections all working together and updating automatically. In this module, participants use one prepared marimo notebook, `module_3.py`, to move through that workflow end to end.
 
 ---
 
-### 3.1 Interactive Computation as a Unified System
+### Presentation
 
-#### The concept: closing the loop
+Interactive computation as a unified system means that data, models, visualizations, and user input are all part of the same live graph. In marimo, widgets are variables, tables can become inputs, model outputs can feed new analysis, and visual changes propagate automatically through the notebook.
 
-In a traditional notebook, data flows in one direction. You write code, it produces output, you look at it. If you want to change a parameter, you edit a cell and re-run. The output is passive — it displays, but it doesn't participate in computation.
+That is the core idea of this module. The goal is not to write a notebook from scratch. The goal is to experience what it feels like when exploration, modeling, and debugging happen in one place without breaking flow.
 
-In marimo, this changes fundamentally. UI elements — sliders, dropdowns, multiselects, tables — are not decorations. They are variables. When you move a slider, `slider.value` changes, and every cell that references `slider.value` re-executes automatically. The output becomes an input. The display becomes part of the computation.
+### Hands-on Exercise (guided in marimo)
 
-This is what it means for your data, models, visualisations, and user input to work as a unified system. There is no boundary between "the interface" and "the code." They are the same reactive graph.
-
-#### Hands-on: wire up the live system
-
-Start a new sandboxed notebook:
+Open the prepared notebook:
 
 ```bash
-marimo edit --sandbox adult_income_explorer.py
+marimo edit --sandbox Module_3/module_3.py
 ```
 
-**Cell 1 — Load the data.** The Adult Income dataset is available directly from OpenML via sklearn:
+This notebook already contains the full workflow. Participants work through it as a guided exercise.
 
-```python
-from sklearn.datasets import fetch_openml
-import pandas as pd
+#### Part 1: Explore the data interactively
 
-data = fetch_openml("adult", version=2, as_frame=True)
-df = data.frame
-df["income"] = (df["class"].str.strip() == ">50K").astype(int)
-df = df.drop(columns=["class"]).dropna()
-df
-```
+Start with the Adult Income dataset and use marimo's built-in data tools:
 
-The last line outputs the dataframe directly below the cell — no `print()`, no `display()`. marimo renders it as a scrollable table automatically.
+- `mo.ui.dataframe(df)` for interactive table inspection
+- `mo.ui.data_explorer(df)` for chart-based exploration
+- `mo.ui.data_editor(df)` for editable tabular input
 
-**Cell 2 — Add a live dataframe explorer.** Replace the plain `df` output with marimo's interactive dataframe viewer:
+Use these to inspect columns, scan values, explore distributions, and understand the dataset before modeling. The notebook also includes a small reactive summary below the editable sample so participants can see that edits flow into downstream output immediately.
 
-```python
-import marimo as mo
+#### Part 2: Control the modeling workflow
 
-mo.ui.dataframe(df)
-```
+The notebook includes live controls such as:
 
-Now you can search, sort, filter, and page through the entire dataset interactively — directly in the notebook. Select the `age` column header to sort. Type in the search box to filter rows. This is `mo.ui.dataframe()` — marimo's built-in infinitely scalable table, capable of handling as much data as fits in your machine's RAM.
+- `mo.ui.multiselect(...)` for feature selection
+- `mo.ui.slider(...)` for training split
+- `mo.ui.slider(...)` for error-table preview settings
 
-**Cell 3 — Add UI controls that the rest of the notebook will react to:**
+As these controls change, the notebook updates automatically. The selected features feed directly into preprocessing, training, and evaluation without requiring a manual rerun sequence.
 
-```python
-feature_selector = mo.ui.multiselect(
-    options=["age", "education-num", "hours-per-week",
-             "capital-gain", "capital-loss"],
-    value=["age", "education-num", "hours-per-week"],
-    label="Features to include"
-)
+#### Part 3: Compare models without breaking flow
 
-train_size_slider = mo.ui.slider(
-    start=0.1, stop=0.9, step=0.1, value=0.7,
-    label="Training set size"
-)
+The notebook trains:
 
-mo.vstack([feature_selector, train_size_slider])
-```
+- **TabICL** as the modern tabular foundation model
+- **Random Forest** as a familiar baseline
 
-**Cell 4 — React to the controls:**
+Participants can change features and train split, then immediately see:
 
-```python
-selected_features = feature_selector.value
-train_size = train_size_slider.value
+- overall model accuracy
+- per-class accuracy
+- differences between TabICL and Random Forest in the plots
+- how the two models react differently to the same feature choices
 
-mo.md(f"""
-**Active configuration:**
-- Features: `{selected_features}`
-- Training split: `{int(train_size * 100)}% / {int((1 - train_size) * 100)}%`
-- Training rows: `{int(len(df) * train_size):,}`
-""")
-```
+This keeps the emphasis on how interactivity changes model development: exploration and experimentation happen in one continuous loop.
 
-Change a feature in the multiselect. Watch the markdown cell update instantly — no re-run, no Shift-Enter. This is the unified system. Everything downstream of `feature_selector.value` and `train_size_slider.value` is now live. The model you'll add in section 3.2 will be part of that same graph.
+#### Part 4: Use visual feedback for debugging
 
-> **From the gallery:** This is the same reactive pattern behind the marimo [Embedding Visualizer](https://molab.marimo.io/github/marimo-team/gallery-examples/blob/main/notebooks/algorithms/visualizing-embeddings.py) — where selecting points in embedding space feeds back as a Python dataframe. The mechanism is identical; only the domain changes.
+The same notebook then shifts from evaluation to debugging:
 
----
+- `mo.ui.radio(...)` switches the debugging view between TabICL and Random Forest
+- an error plot shows where predictions are failing
+- `mo.ui.table(...)` lets participants select misclassified rows
+- the selected subset is sent back into Python for further summary and inspection
 
-### 3.2 Interactive Data in Model Development
+This creates the full interactive cycle:
 
-#### The concept: never breaking the flow
+**explore data → fit models → inspect errors → make a change → observe the result**
 
-Data exploration and model development are usually two separate phases. You explore in one set of cells, decide what to keep, manually copy those decisions into another set of cells for preprocessing, then run the model. Every time you change your mind about a feature or a filter, you repeat the cycle manually.
+That is the main takeaway of Module 3. Interactivity is not a convenience layer on top of notebook work. It changes the way experimentation happens.
 
-In marimo, these phases collapse into one. Your exploration controls *are* your preprocessing pipeline. There is no handoff step, no copy-paste, no re-running a chain of cells. The data you're looking at is the data the model sees — always, automatically.
+#### What's Next
+Quiz
 
-#### Hands-on: shape data, feed the model
-
-Continue in `adult_income_explorer.py`. Add these cells below what you built in 3.1.
-
-**Cell 5 — Transform and split, reactively:**
-
-```python
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-import numpy as np
-
-# Encode categoricals in selected features only
-X = df[selected_features].copy()
-for col in X.select_dtypes(include="object").columns:
-    X[col] = LabelEncoder().fit_transform(X[col].astype(str))
-
-y = df["income"].values
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    train_size=train_size,
-    random_state=42,
-    stratify=y
-)
-
-mo.md(f"""
-**Dataset ready**
-- Training: `{len(X_train):,}` rows × `{len(selected_features)}` features
-- Test: `{len(X_test):,}` rows
-""")
-```
-
-This cell references `selected_features` and `train_size` — both defined by UI controls in Cell 3. Every time you adjust a slider or toggle a feature, this cell re-runs automatically. The train/test split always reflects your current choices.
-
-**Cell 6 — Introduce TabICL and fit the model.**
-
-First, install TabICL (run this once in your terminal, or let marimo prompt you when running with `--sandbox`):
-
-```bash
-pip install tabicl
-```
-
-```python
-from tabicl import TabICLClassifier
-from sklearn.metrics import accuracy_score
-
-clf = TabICLClassifier()
-clf.fit(X_train, y_train)
-
-preds = clf.predict(X_test)
-acc = accuracy_score(y_test, preds)
-
-mo.md(f"### Accuracy: `{acc:.1%}`")
-```
-
-> **What is TabICL?** TabICL (Tabular In-Context Learning) is a tabular foundation model pretrained on millions of synthetic datasets. Unlike traditional models, it requires no hyperparameter tuning — you pass it data and it classifies in a single forward pass using in-context learning, the same mechanism that lets large language models solve new tasks from examples. The result is a state-of-the-art classifier that adapts entirely to the data you give it, with no configuration required. This makes it the ideal model for an interactive pipeline: there is nothing to tune, so all the interactivity focuses on the data itself. TabICL was introduced at ICML 2025 by researchers at Inria.
-
-Now do this: **deselect `education-num`** from the feature multiselect. Watch the accuracy update. Add it back. Watch it recover. **Drag the training size slider to 0.2.** See the accuracy drop as the model has less context to learn from. Drag it back to 0.7. The entire chain — split, encode, fit, evaluate — re-runs automatically every time.
-
-This is interactive data in model development. You are not running experiments sequentially. You are navigating a live parameter space, and the model responds in real time.
-
-**Cell 7 — Visualise per-class accuracy to deepen the picture:**
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-
-classes = ["≤$50K", ">$50K"]
-per_class_acc = [
-    accuracy_score(y_test[y_test == i], preds[y_test == i])
-    for i in [0, 1]
-]
-
-fig, ax = plt.subplots(figsize=(5, 3))
-bars = ax.bar(classes, per_class_acc, color=["#4C72B0", "#DD8452"])
-ax.set_ylim(0, 1)
-ax.set_ylabel("Accuracy")
-ax.set_title(f"Per-class accuracy\n(train size: {int(train_size*100)}%,"
-             f" features: {len(selected_features)})")
-for bar, val in zip(bars, per_class_acc):
-    ax.text(bar.get_x() + bar.get_width()/2,
-            bar.get_height() + 0.02,
-            f"{val:.1%}", ha="center", fontsize=11)
-plt.tight_layout()
-fig
-```
-
-Now the story gets interesting. Drag the training slider down. Both bars drop — but not equally. The model degrades faster on the minority class (>$50K). Remove features one by one and watch which class suffers first. You have just turned a static model evaluation into an interactive fairness probe — without writing a single extra line of analysis code.
-
----
-
-### 3.3 Visual Feedback for Analysis and Debugging
-
-#### The concept: outputs as inputs
-
-Section 3.2 showed data flowing *into* the model. This section shows information flowing *back out* — not just as numbers, but as selections you can act on. In marimo, a visualisation isn't just a display. A table isn't just a readout. Both can be interaction surfaces that feed back into your Python environment.
-
-When you select rows in a `mo.ui.table()`, those rows come back as a dataframe. When a chart highlights a cluster, you can get that cluster back as data. This closes the loop: explore → model → visualise → select → explore again. Every observation becomes actionable.
-
-#### Hands-on: find and interrogate the errors
-
-Continue in the same notebook. Add these cells below section 3.2.
-
-**Cell 8 — Build the error map.**
-
-> **Note:** This cell plots `age` vs `hours-per-week`. Make sure both are included in your feature selector before running it.
-
-```python
-import matplotlib.pyplot as plt
-
-# Attach predictions and ground truth to test rows
-results_df = X_test.copy()
-results_df["true_label"] = y_test
-results_df["predicted"] = preds
-results_df["correct"] = (y_test == preds).astype(int)
-results_df["income_label"] = results_df["true_label"].map(
-    {0: "≤$50K", 1: ">$50K"}
-)
-
-correct = results_df[results_df["correct"] == 1]
-errors = results_df[results_df["correct"] == 0]
-
-fig, ax = plt.subplots(figsize=(7, 5))
-ax.scatter(correct["age"], correct["hours-per-week"],
-           c="#4C72B0", alpha=0.3, s=15, label="Correct")
-ax.scatter(errors["age"], errors["hours-per-week"],
-           c="#C44E52", alpha=0.6, s=20, label="Misclassified")
-ax.set_xlabel("Age")
-ax.set_ylabel("Hours per week")
-ax.set_title("Model errors: age vs hours worked")
-ax.legend()
-plt.tight_layout()
-fig
-```
-
-Look at where the red dots cluster. Are errors concentrated in a particular age band? Among people who work unusually long or short hours? This scatter plot is your first visual signal — a pattern in the mistakes that numbers alone wouldn't surface.
-
-**Cell 9 — Make errors selectable:**
-
-```python
-# Show only columns that are actually in the dataframe (depends on current feature selection)
-feature_cols = [c for c in ["age", "education-num", "hours-per-week", "capital-gain"]
-                if c in errors.columns]
-error_table = mo.ui.table(
-    errors[feature_cols + ["income_label", "predicted"]].rename(
-        columns={"income_label": "true", "predicted": "pred"}
-    ),
-    label="Select misclassified rows to inspect"
-)
-error_table
-```
-
-Select a group of rows from the table — perhaps the ones in an age range you noticed clustering in the scatter. marimo sends those rows back to Python immediately.
-
-**Cell 10 — Inspect the selection:**
-
-```python
-selected = error_table.value
-
-if len(selected) > 0:
-    mo.vstack([
-        mo.md(f"**{len(selected)} rows selected**"),
-        mo.md(f"""
-| Feature | Selected mean | Full test mean |
-|---|---|---|
-| Age | {selected['age'].mean():.1f} | {results_df['age'].mean():.1f} |
-| Hours/week | {selected['hours-per-week'].mean():.1f} | {results_df['hours-per-week'].mean():.1f} |
-| Education | {selected['education-num'].mean():.1f} | {results_df['education-num'].mean():.1f} |
-""")
-    ])
-else:
-    mo.callout(mo.md("Select rows in the table above to inspect them."),
-               kind="info")
-```
-
-Select the cluster of red dots you identified. The comparison table appears instantly. Are the selected errors older workers? People with high capital gains that the model hasn't seen in training? People with atypical hours patterns?
-
-**Cell 11 — Close the loop:**
-
-```python
-mo.md("""
-### What to do with this
-
-Go back to the **feature selector** in section 3.1 and add or remove features based on what you've just found. If capital gain seems to be driving errors, include it. If education-num doesn't seem to separate errors from correct predictions, try removing it.
-
-Watch the scatter plot in Cell 8 update. Watch the per-class accuracy bars in Cell 7 shift. Watch the error table in Cell 9 populate with a different set of rows.
-
-You have just completed one full iteration of the interactive ML loop:
-**explore data → fit model → visualise errors → form a hypothesis → adjust data → repeat.**
-
-In a traditional notebook, this loop takes 10–15 minutes of manual re-running. In marimo, it takes as long as it takes you to think.
-""")
-```
-
-> **Going deeper:** The pattern you've built here — select points, get them back as data, act on them — is the same mechanism behind the marimo [Visualizing Embeddings](https://molab.marimo.io/github/marimo-team/gallery-examples/blob/main/notebooks/algorithms/visualizing-embeddings.py) gallery notebook, and behind the published research on [Minimum-distortion Embedding](https://arxiv.org/abs/2103.02559) by Akshay Agrawal at Stanford. The notebook you just built is a simplified version of real research infrastructure.
-
----
-
-The three sections of this module have built one thing: a notebook where data exploration, model evaluation, and error analysis are not separate steps but a single continuous loop. That loop is fast enough to think inside. And that speed — the ability to form a hypothesis and test it before you've forgotten why you had it — is what interactivity actually means for AI discovery.
+Use `Module_3/module-3-quiz-viewer.html` to review the key ideas from the notebook.
 
 Module 4 takes this further: what happens when you bring AI coding agents into this environment, and let them help you write and iterate on the notebook itself.
 
@@ -1030,7 +809,7 @@ marimo has AI assistance built directly into the editor — no plugin, no separa
 
 #### Hands-on: use AI to extend your Adult Income notebook
 
-Open `adult_income_explorer.py` from Module 3. Hover over the Cell 7 (per-class accuracy bar chart) and click **Generate with AI**.
+Open `module_3.py` from Module 3. Hover over the Cell 7 (per-class accuracy bar chart) and click **Generate with AI**.
 
 Prompt: *"Add a ROC curve plot below this cell using the test predictions. Use matplotlib, same style as the bar chart."*
 
@@ -1107,7 +886,7 @@ In practice: if you tell Claude Code "the preprocessing in this notebook is too 
 
 #### Hands-on: prompt with context
 
-In `adult_income_explorer.py`, open the Chat panel. Without pasting anything, type:
+In `module_3.py`, open the Chat panel. Without pasting anything, type:
 
 *"The per-class accuracy gap between the two income classes seems large. What features might explain this? Suggest a cell that analyses feature distributions split by correct vs incorrect predictions."*
 
@@ -1282,7 +1061,7 @@ ollama pull qwen2.5-coder:7b
 
 In marimo settings → AI, set `model: ollama/qwen2.5-coder:7b` and `base_url: http://localhost:11434`.
 
-**Step 2 — Test with a real task.** In `adult_income_explorer.py`, hover over Cell 5 and click Generate with AI. Prompt:
+**Step 2 — Test with a real task.** In `module_3.py`, hover over Cell 5 and click Generate with AI. Prompt:
 
 *"Refactor this into a function called `prepare_data` that takes df, selected_features, and train_size as arguments and returns X_train, X_test, y_train, y_test."*
 
@@ -1312,7 +1091,7 @@ Module 5 brings everything full circle: once your interactive, AI-assisted, repr
 
 Everything you've built across this course — the reactive notebook, the reproducible environment, the interactive ML pipeline, the AI-assisted workflow — has lived in a single `.py` file. This module shows you how to take that file and do four things with it that are impossible with a traditional Jupyter notebook: run it as a script, serve it as a web app, publish it as a shareable artifact, and import from it as a Python module.
 
-Each section uses `adult_income_explorer.py` from Module 3 as the working example. By the end of this module, the same file you built interactively will be running in four different modes — no duplication, no reformatting, no export step.
+Each section uses `module_3.py` from Module 3 as the working example. By the end of this module, the same file you built interactively will be running in four different modes — no duplication, no reformatting, no export step.
 
 ---
 
@@ -1329,12 +1108,12 @@ This matters for ML pipelines because it means your interactive exploration and 
 **Step 1 — Run the notebook directly:**
 
 ```bash
-python adult_income_explorer.py
+python module_3.py
 ```
 
 The notebook executes: data loads, preprocessing runs, TabICL fits, accuracy prints. No browser, no kernel, no UI. The reactive graph determines execution order automatically.
 
-**Step 2 — Add command-line arguments with argparse.** Open `adult_income_explorer.py` and add a setup cell at the top (right-click the first cell → "Add setup cell"):
+**Step 2 — Add command-line arguments with argparse.** Open `module_3.py` and add a setup cell at the top (right-click the first cell → "Add setup cell"):
 
 ```python
 import argparse
@@ -1382,7 +1161,7 @@ else:
 **Step 4 — Run with arguments:**
 
 ```bash
-python adult_income_explorer.py --train-size 0.5 --features age hours-per-week capital-gain
+python module_3.py --train-size 0.5 --features age hours-per-week capital-gain
 ```
 
 The same notebook that runs interactively with sliders now accepts CLI arguments for automation. One file, both modes.
@@ -1391,14 +1170,14 @@ The same notebook that runs interactively with sliders now accepts CLI arguments
 
 ```bash
 # Run every day at 6am, log output
-0 6 * * * python /path/to/adult_income_explorer.py --train-size 0.8 >> /logs/daily_run.log 2>&1
+0 6 * * * python /path/to/module_3.py --train-size 0.8 >> /logs/daily_run.log 2>&1
 ```
 
 Or in a GitHub Action:
 
 ```yaml
 - name: Run notebook as script
-  run: python adult_income_explorer.py --train-size 0.8
+  run: python module_3.py --train-size 0.8
 ```
 
 > **Docs:** [docs.marimo.io/guides/scripts](https://docs.marimo.io/guides/scripts/) — covers `argparse` and `simple-parsing` integration and scheduled execution patterns.
@@ -1418,7 +1197,7 @@ There is no conversion step, no framework to learn, no separate deployment file.
 **Step 1 — Launch in app mode:**
 
 ```bash
-marimo run adult_income_explorer.py
+marimo run module_3.py
 ```
 
 Open the URL in your browser. You see the `mo.ui.dataframe()` explorer, the feature multiselect, the train size slider, the accuracy output, and the error scatter plot — all working reactively. The TabICL fit, the preprocessing pipeline, the matplotlib code — none of it is visible. It looks like a dashboard.
@@ -1450,7 +1229,7 @@ mo.hstack([
 **Step 5 — Share with a teammate.** If you're both on the same network:
 
 ```bash
-marimo run adult_income_explorer.py --host 0.0.0.0 --port 8080
+marimo run module_3.py --host 0.0.0.0 --port 8080
 ```
 
 Your teammate opens `http://your-ip:8080` and gets the full interactive app. No Python, no marimo, no setup required on their end.
@@ -1472,7 +1251,7 @@ Not everyone needs the live app. Sometimes you want to send a link to a static r
 **Step 1 — Export to static HTML.** This captures your current notebook state — code, outputs, plots — as a single self-contained HTML file:
 
 ```bash
-marimo export html adult_income_explorer.py -o report.html
+marimo export html module_3.py -o report.html
 ```
 
 Open `report.html` in any browser. No Python, no server. Share it as an email attachment, add it to a documentation site, or commit it to a repo. The plots, tables, and Markdown are all there.
@@ -1480,19 +1259,19 @@ Open `report.html` in any browser. No Python, no server. Share it as an email at
 To include pre-rendered outputs (so the HTML shows results immediately without running anything):
 
 ```bash
-marimo export html adult_income_explorer.py -o report.html --include-outputs
+marimo export html module_3.py -o report.html --include-outputs
 ```
 
 **Step 2 — Export to PDF:**
 
 ```bash
-marimo export pdf adult_income_explorer.py -o report.pdf
+marimo export pdf module_3.py -o report.pdf
 ```
 
 **Step 3 — Publish to molab.** Push your notebook to a GitHub repository, then generate a shareable molab preview URL:
 
 ```
-https://molab.marimo.io/github/<your-username>/<your-repo>/blob/main/adult_income_explorer.py
+https://molab.marimo.io/github/<your-username>/<your-repo>/blob/main/module_3.py
 ```
 
 Anyone with this URL sees a live preview of your notebook. They can fork it into their own molab workspace and run it — with the same sandbox environment, the same inline dependencies — without installing anything. This is the sharing story for research: one URL, fully reproducible.
@@ -1500,7 +1279,7 @@ Anyone with this URL sees a live preview of your notebook. They can fork it into
 **Step 4 — Generate a WASM-powered interactive HTML.** This exports your notebook as a self-contained HTML file that runs entirely in the browser via WebAssembly — no server needed, fully interactive:
 
 ```bash
-marimo export html-wasm adult_income_explorer.py -o interactive_report.html
+marimo export html-wasm module_3.py -o interactive_report.html
 ```
 
 Open `interactive_report.html`. The sliders work. The model runs. Everything is live — powered by Python compiled to WebAssembly, running in the browser tab. You can host this on GitHub Pages, embed it in a documentation site, or send it directly.
@@ -1522,7 +1301,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install marimo
-      - run: marimo export html-wasm adult_income_explorer.py -o docs/index.html
+      - run: marimo export html-wasm module_3.py -o docs/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
@@ -1547,7 +1326,7 @@ The only requirement is the **setup cell**: a special cell that runs before the 
 
 #### Hands-on: make your notebook importable
 
-**Step 1 — Create a setup cell.** In `adult_income_explorer.py`, right-click the first cell and select **"Convert to setup cell"** (or add one via the cell menu). The setup cell is marked with a special indicator in the editor and always runs first.
+**Step 1 — Create a setup cell.** In `module_3.py`, right-click the first cell and select **"Convert to setup cell"** (or add one via the cell menu). The setup cell is marked with a special indicator in the editor and always runs first.
 
 **Step 2 — Move reusable logic into the setup cell:**
 
