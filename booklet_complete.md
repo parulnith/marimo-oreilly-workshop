@@ -364,6 +364,75 @@ When you open a marimo notebook, you'll see:
 
 At this point in a live session, it is useful to show participants how to run a cell, how outputs appear below the cell, and what the sidebar panels expose. Once they have seen the mechanics, the deeper ideas land much more easily.
 
+#### Editor Features That Matter in Practice
+
+The marimo editor is not just a place to type code. It is a browser-based IDE designed for notebook work, with features that are especially useful when you are working with data and experiments.
+
+**Dataflow tools**
+
+marimo includes several tools for understanding notebook structure:
+
+- **Variables panel** — inspect current variables, types, and values
+- **Dependency graph** — see how cells depend on one another
+- **Minimap / dataflow navigation** — move through larger notebooks more easily
+
+These features make the notebook's execution model visible. Instead of guessing what depends on what, you can inspect the graph directly.
+
+**Sidebar and developer panel**
+
+The sidebar is designed to keep notebook state, docs, logs, and tools close at hand. In practice, this means you can inspect variables, check logs, look at documentation, and manage packages without leaving the editor.
+
+Both the sidebar and the developer panel are customizable:
+
+- Reorder panels by dragging them within a section
+- Move panels between the sidebar and developer panel by dragging them
+- Hide panels by right-clicking a panel icon and choosing the relevant option
+
+These layout preferences persist across sessions. Panels also adapt to where they are placed: a compact vertical layout in the sidebar, and a wider horizontal layout in the developer panel.
+
+**Package management**
+
+marimo integrates package management into the editor. If you import something that is missing, marimo can prompt you to install it directly instead of forcing you to drop out to the shell first.
+
+**Module autoreloading**
+
+If your notebook imports code from a local Python module and that module changes, marimo can detect it and tell you which cells need to be rerun. This is especially useful when notebooks are part of a larger project rather than isolated files.
+
+**Code intelligence**
+
+marimo supports modern code-editing features expected from an IDE:
+
+- code completion
+- language server support (LSP) for diagnostics and code intelligence
+- live documentation previews
+- optional AI-assisted coding
+
+This matters because marimo is not asking you to trade away real editor features in exchange for notebook interactivity.
+
+**Right-click menus**
+
+marimo supports context-sensitive right-click menus in the editor. Right-click on a cell to open actions relevant to that cell. Right-click on the create-cell button (the plus icon) to choose what type of cell to create. This is especially useful in a live workshop because participants can discover common actions directly from the interface instead of memorizing commands.
+
+**Command palette**
+
+Hit `Cmd/Ctrl+K` to open the command palette. This is a fast way to discover and run editor actions without hunting through the interface.
+
+**Slides from notebooks**
+
+marimo notebooks can also be used to create slides. This is useful when you want one artifact to serve both as a working notebook and as a presentation. In practice, this means you can build an interactive explanation in marimo and then present it directly, instead of rewriting the same material in a separate slide tool.
+
+For this workshop, the key point is conceptual: marimo is not just a notebook runtime. It is also a presentation surface. That makes it easier to move from exploration to explanation without leaving the same environment.
+
+**Share on the online playground**
+
+You can also get a shareable link to a notebook through marimo's online playground. This is useful when you want to send someone a live notebook experience without asking them to install anything locally.
+
+The playground uses WebAssembly, so many packages work there, but not every package on PyPI is supported. Local files are also not synchronized automatically to the playground.
+
+**Export to static HTML**
+
+If you want to share the current view of a notebook as a static artifact, marimo can export it to HTML from the notebook menu. This is useful when the audience does not need to run the code and you just want to share the rendered results.
+
 #### How It Works: The DAG
 
 Every marimo notebook is modeled as a **directed acyclic graph (DAG)** on cells. marimo reads your code using static analysis — without running it — and determines what each cell defines and what it references. From there, it builds a dependency graph.
@@ -715,27 +784,51 @@ marimo edit --sandbox Module_3/module_3.py
 
 This notebook already contains the full workflow. Participants work through it as a guided exercise.
 
-#### Part 1: Explore the data interactively
+#### Part 1: Start with the data
 
-Start with the Adult Income dataset and use marimo's built-in data tools:
+Start with the Adult Income dataset itself before moving into visual exploration:
 
-- `mo.ui.dataframe(df)` for interactive table inspection
-- `mo.ui.data_explorer(df)` for chart-based exploration
+- the plain `df` output for a baseline table view
 - `mo.ui.data_editor(df)` for editable tabular input
 
-Use these to inspect columns, scan values, explore distributions, and understand the dataset before modeling. The notebook also includes a small reactive summary below the editable sample so participants can see that edits flow into downstream output immediately.
+Use these to inspect columns, scan values, and show that tabular data can
+become part of the computation. The notebook includes a reactive summary below
+the editable sample so participants can see that edits flow into downstream
+output immediately.
 
-#### Part 2: Control the modeling workflow
+Presenter cue:
+
+- For `mo.ui.data_editor(df)`: explain that it is a data editor component for editing tabular data.
+
+#### Part 2: Move into visual exploration
+
+The notebook then introduces marimo's visual exploration tools:
+
+- `mo.ui.data_explorer(df)` for chart-based exploration
+- `mo.ui.dataframe(df)` for interactive table inspection
+
+Use these to explore distributions, inspect patterns, and decide what is worth
+carrying forward into the modelling step.
+
+Presenter cues:
+
+- For `mo.ui.data_explorer(df)`: build a quick chart with `occupation` on the x-axis, `count` on the y-axis, and color by `sex` so participants can see how the explorer helps surface patterns visually without writing plotting code.
+- For `mo.ui.dataframe(df)`: use the `workclass` column as an example. Show attendees how to sort that column and then clear the sort again.
+
+#### Part 3: Control the modeling workflow
 
 The notebook includes live controls such as:
 
 - `mo.ui.multiselect(...)` for feature selection
-- `mo.ui.slider(...)` for training split
 - `mo.ui.slider(...)` for error-table preview settings
 
-As these controls change, the notebook updates automatically. The selected features feed directly into preprocessing, training, and evaluation without requiring a manual rerun sequence.
+As these controls change, the notebook updates automatically. The selected features feed directly into preprocessing, training, and evaluation without requiring a manual rerun sequence. The notebook uses a standard scikit-learn split with a fixed `test_size=0.2`, `random_state=42`, and `stratify=y`.
 
-#### Part 3: Compare models without breaking flow
+Presenter cue:
+
+- Point out that the split is intentionally conventional here: `train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)`. The interactive part is the feature selection and downstream analysis, not the split parameter itself.
+
+#### Part 4: Compare models without breaking flow
 
 The notebook trains:
 
@@ -751,7 +844,7 @@ Participants can change features and train split, then immediately see:
 
 This keeps the emphasis on how interactivity changes model development: exploration and experimentation happen in one continuous loop.
 
-#### Part 4: Use visual feedback for debugging
+#### Part 5: Use visual feedback for debugging
 
 The same notebook then shifts from evaluation to debugging:
 
@@ -776,240 +869,213 @@ Module 4 takes this further: what happens when you bring AI coding agents into t
 ---
 
 ## Module 4: How to Use AI Coding Agents for AI/ML Development
+AI coding agents are most useful when they are integrated directly into your development environment and can work with the actual state of your notebook. In marimo, the point is not just that AI can write code. The point is that AI can work inside a live notebook that already has dataframes, model outputs, variables, and dependencies in memory.
 
-AI coding agents have become a standard part of the ML development workflow. But how useful they are depends heavily on *when* you use them, *what information* they have access to, and *which setup* matches your constraints. A well-integrated agent in the right environment feels like a fast, knowledgeable collaborator. A poorly integrated one produces generic code that doesn't know what variables you have, what your data looks like, or what you just tried.
+### Presentation
 
-This module is practical. It covers the three decisions that determine how much value you actually get from AI assistance in ML work: when to use it, how to give it context, and how to choose your setup.
+AI coding agents integrated directly into the notebook environment can act like fast collaborators rather than detached text generators. In ML and AI workflows, their value depends on:
 
----
+- when you let them generate or modify code
+- what notebook context they can see
+- what tools they are allowed to use
+- whether you run them through a hosted provider or a local/private setup
 
-### 4.1 When to Let AI Agents Write Code for You
+The core idea of this module is practical: better context leads to better AI assistance, and marimo is designed to provide that context inside the workflow itself.
 
-#### The concept: acceleration, not replacement
+### Hands-on Exercise (guided in marimo)
 
-AI coding agents are best used for tasks where the *structure* of what you need is clear but the *implementation* is tedious, unfamiliar, or repetitive. In ML work, those tasks come up constantly:
+Use marimo's AI features inside `Module_3/module_3.py`:
 
-- Boilerplate preprocessing pipelines — encoding categoricals, scaling numerics, splitting data
-- Plotting code — you know what you want to see, the matplotlib API is just in the way
-- Metric computation and reporting — accuracy, F1, confusion matrices, classification reports
-- Refactoring — turning a messy exploratory cell into a clean function
-- Library lookups — you know *what* you need, not *how* the API spells it
+- generate or modify code directly in the active notebook
+- refactor an existing cell without leaving the editor
+- provide explicit variable context such as `@df`
+- compare the quality of a low-context prompt and a context-rich prompt
+- discuss the tradeoffs between local and cloud-hosted setups
 
-Where agents provide less value: core scientific reasoning, hypothesis formation, deciding which features are worth engineering, interpreting results. Those require your domain knowledge and judgment. The agent writes the code; you decide what the code should do.
-
-#### marimo's AI features
-
-marimo has AI assistance built directly into the editor — no plugin, no separate window. There are two modes:
-
-**Inline cell generation** — Click the **Generate with AI** button that appears when hovering over any cell, or open the **Chat panel** from the sidebar. Describe what you want in plain English. marimo generates a new cell or refactors an existing one. The result is inserted directly into your notebook, reactive and ready to run.
-
-**Agents** — Full coding agents that can read your notebook, write and edit multiple cells, run code, observe outputs, and iterate. Supported agents include Claude Code, Gemini Agent, Codex, and OpenCode. Agents operate on the `.py` file directly — because marimo notebooks are plain Python, the agent can read, understand, and edit the entire notebook as source code, with no JSON parsing or cell format translation.
-
-**Generate entire notebooks** — From the marimo home screen, describe a notebook you want and marimo generates the full structure — cells, Markdown, UI elements — as a starting point. Useful for scaffolding a new experiment quickly before diving in to customise it.
-
-#### Hands-on: use AI to extend your Adult Income notebook
-
-Open `module_3.py` from Module 3. Hover over the Cell 7 (per-class accuracy bar chart) and click **Generate with AI**.
-
-Prompt: *"Add a ROC curve plot below this cell using the test predictions. Use matplotlib, same style as the bar chart."*
-
-marimo generates the cell. Review it — does it reference `preds`, `y_test`, and `X_test` correctly? If so, run it. If the variable names are slightly off, edit them. The point is that you didn't write the matplotlib boilerplate; you described the intent and reviewed the result.
-
-Now try the Chat panel. Open it from the sidebar and type: *"Refactor the preprocessing in Cell 5 into a reusable function called `preprocess_data` that takes a dataframe and a list of feature names."*
-
-The agent edits Cell 5. Because marimo's variable context is automatically included, the agent already knows the shape of `df`, the names of your features, and how `X_train` is currently defined. It doesn't need you to paste anything.
-
-> **Tip — where AI helps most in ML work:** Use it for Cell 7-style visualisation code and Cell 5-style preprocessing refactors. Don't use it for the scientific decisions — which features to include, how to interpret the error clusters from Cell 8, whether the per-class accuracy gap indicates a fairness problem. Those are yours.
+The goal is to let participants experience AI as part of a live notebook workflow, not as a separate code-generation website.
 
 ---
 
-### 4.2 Giving AI Coding Agents the Context They Need
+### 4.1 AI-assisted coding in marimo
 
-#### The concept: context is everything
+marimo is an AI-native editor with support for full-cell AI code generation:
 
-The difference between a useful AI suggestion and a useless one is almost always context. An agent that doesn't know your variable names generates placeholder names. An agent that doesn't know your dataframe's schema generates column names that don't exist. An agent that doesn't know what you've already tried suggests things you've already ruled out.
+- generating new cells from a prompt
+- refactoring existing cells from a prompt
+- generating entire notebooks
+- inline autocompletion, similar to Copilot-style tools
 
-In traditional notebooks, providing this context is manual work — you paste error messages, copy schema outputs, describe your data in the prompt. The agent works from a description of your state, not the state itself.
+marimo's AI assistant is specialized for working with data. Unlike traditional assistants that only see the text of your program, marimo's assistant can also work with the values of variables in memory.
 
-marimo changes this structurally in two ways.
+#### Getting set up
 
-#### Automatic variable context
+To use AI generation in marimo:
 
-When you invoke AI assistance in marimo — either the inline generator or the Chat panel — marimo automatically includes the **names, types, and current values** of all variables in scope. The agent sees that `df` is a `DataFrame` with shape `(45,222, 14)`, that `selected_features` is currently `["age", "education-num", "hours-per-week"]`, that `acc` is `0.847`. You don't tell it this. marimo tells it.
+1. Install the required dependencies through the notebook settings
+2. Configure your LLM provider in the AI tab of the settings menu
 
-This is possible because marimo's reactive runtime always knows the current state of every variable — there is no hidden state, no out-of-order execution, no stale values. The variable panel you can see in the sidebar is exactly the context the agent receives.
+marimo works with hosted providers such as OpenAI, Anthropic, and Google, as well as local models served through Ollama and other OpenAI-compatible providers.
 
-In practice this means your prompts can be much shorter and more direct. Instead of: *"I have a pandas dataframe called df with columns age, education-num, hours-per-week and a target column called income. Please write code to..."* — you just write: *"Plot the distribution of each selected feature, coloured by income."* The agent already knows what the variables are.
+Several marimo AI features rely on your `marimo.toml` configuration file. Locate it with:
 
-#### Custom rules
-
-For persistent preferences that should apply across all AI interactions in a notebook, marimo supports **custom rules** — instructions you write once that the AI always follows. Set them in the AI settings panel:
-
+```bash
+marimo config show | head
 ```
-Always use matplotlib for plotting, not seaborn or plotly.
-Use f-strings for string formatting.
+
+#### The main entry points
+
+There are four main ways to use AI in the editor:
+
+- **Generate new cells** with the **Generate with AI** button at the bottom of the notebook
+- **Refactor the current cell** with `Ctrl/Cmd-Shift-E`
+- **Use the Chat panel** to ask notebook-level questions or generate cells from a side panel
+- **Generate entire notebooks** from the command line with:
+
+```bash
+marimo new "your prompt here"
+```
+
+#### Hands-on: generate and refactor inside `module_3.py`
+
+Open `module_3.py` from Module 3.
+
+**Task 1 — Generate a new analysis cell.** Click **Generate with AI** and prompt:
+
+*"Add a new cell below the model-comparison section that compares the top 5 occupations for rows predicted as high income versus low income."*
+
+Review the generated code, then insert it into the notebook.
+
+**Task 2 — Refactor an existing cell.** Click into the preprocessing/modeling part of the notebook and press `Ctrl/Cmd-Shift-E`.
+
+Prompt:
+
+*"Refactor this cell so the preprocessing logic is moved into a helper function called `prepare_features`."*
+
+The point of the exercise is not to accept AI output blindly. It is to review generated code in the same notebook where it will run.
+
+---
+
+### 4.2 Context, prompts, and tools
+
+The quality of AI assistance depends heavily on context. marimo improves that context in several ways.
+
+#### Variable context with `@`
+
+marimo's AI assistant already has the notebook code as context. You can additionally pass variables and their values to the assistant by tagging them with `@`.
+
+For example:
+
+- `@df` includes the dataframe `df`
+- `@selected_features` includes the currently selected feature list
+- `@results_df` includes the current results table
+
+This is especially useful in notebook work because the assistant is not guessing your schema from text alone. It can work from the current notebook state.
+
+#### Chat panel modes
+
+The Chat panel supports three modes:
+
+- **Manual** — no tool access; the model responds only from the conversation and any manually injected context
+- **Ask** — read-only tools plus context gathering, so the assistant can inspect the notebook
+- **Agent (beta)** — everything in Ask mode plus the ability to edit notebook cells and run stale cells
+
+Use these modes differently:
+
+- choose **Manual** when you want a pure explanation
+- choose **Ask** when you want notebook-aware reasoning without edits
+- choose **Agent** when you want the assistant to actually modify the notebook
+
+#### Tools inside the AI workflow
+
+marimo's AI workflow is tool-aware. The assistant can inspect notebook structure, gather context, and in stronger modes interact with notebook cells rather than just producing text. This is what makes it feel integrated into the editor instead of bolted on.
+
+#### Prompt templates and custom rules
+
+marimo provides prompt templates for common notebook tasks, which is useful when participants know roughly what they want but need a stronger prompt.
+
+marimo also supports **custom rules** in settings so that AI output stays consistent across prompts and providers. For example:
+
+```text
+Always use matplotlib for plotting.
 Prefer pandas over polars.
-Never use global variables — wrap logic in functions.
+Use type hints for helper functions.
+Use f-strings for string formatting.
 ```
 
-These rules travel with the notebook's configuration. If you share the notebook with a colleague, they get the same AI behaviour.
+These rules are useful in workshop settings because they keep AI-generated code aligned with the style you are teaching.
 
-#### Skills for Claude Code
+#### Hands-on: compare low-context and high-context prompts
 
-If you use Claude Code as your agent, marimo supports **skills** — reusable markdown files that teach Claude how to work with your specific codebase, conventions, or domain. A skill might define how your team structures preprocessing pipelines, which internal libraries to import, or what format model evaluation outputs should take.
+In `module_3.py`, open the Chat panel and try this plain prompt:
 
-Skills live in `.claude/commands/` in your project directory. Invoke one by typing `/skill-name` in the Claude Code terminal — Claude loads those instructions as persistent context for the session.
+*"Add a cell that explores which features are associated with model mistakes."*
 
-This workshop ships a skill at `.claude/commands/marimo-notebook.md`. It covers:
+Then try a richer prompt:
 
-- The `@app.cell` structure and how parameters and return values wire cells together
-- `hide_code=True`, `mo.md()`, and `@app.function` conventions
-- How to write reactive UI elements (`mo.ui.slider`, `mo.ui.table`, etc.)
-- PEP 723 dependency block — where to add new packages
-- Workshop conventions: matplotlib only, one output per cell, no global state
+*"Using @df, @selected_features, and the current results table, add a cell that compares the distributions of selected features for correct versus incorrect predictions."*
 
-To use it, run Claude Code in the workshop directory and type:
-
-```
-/marimo-notebook
-```
-
-Claude now understands marimo's cell model, the workshop's conventions, and the key files — without you explaining any of it in the prompt.
-
-Skills are particularly valuable in ML work because the same patterns repeat across experiments: the same feature encoding logic, the same evaluation suite, the same plotting style. Rather than re-explaining these to the agent in every session, you define them once and invoke them in one word.
-
-#### The .py format advantage
-
-Because marimo notebooks are plain `.py` files, agents that operate at the file level — Claude Code, Codex, OpenCode — can read the entire notebook as source code. They see the `@app.cell` structure, the function signatures, the variable dependencies. They understand which cells depend on which variables. This is structurally impossible with `.ipynb` files, where the agent sees JSON metadata interleaved with code, and has no way to understand the execution graph.
-
-In practice: if you tell Claude Code "the preprocessing in this notebook is too slow — can you optimise it?", it can read the whole file, identify the bottleneck cells, understand their dependencies, and propose targeted changes. It's working from the actual program structure, not a description of it.
-
-#### Hands-on: prompt with context
-
-In `module_3.py`, open the Chat panel. Without pasting anything, type:
-
-*"The per-class accuracy gap between the two income classes seems large. What features might explain this? Suggest a cell that analyses feature distributions split by correct vs incorrect predictions."*
-
-The agent's response will reference your actual variable names — `results_df`, `correct`, `errors`, `selected_features` — because marimo has already provided that context. If the suggestion looks right, insert the generated cell and run it.
-
-Then set a custom rule: *"All matplotlib figures should use `figsize=(7, 4)` and `plt.tight_layout()`."* Regenerate the ROC curve cell from 4.1. Notice the style is now consistent without you specifying it in the prompt.
+Compare the two results. The second prompt should usually be more specific, more aligned with the notebook, and require less cleanup.
 
 ---
 
-### 4.3 Choosing the Right AI Coding Agent Setup
+### 4.3 Agents, MCP, copilots, and setup choices
 
-#### The concept: three real options
+marimo supports richer AI workflows than just cell generation.
 
-Picking an AI coding setup comes down to four tensions: **capability** vs **privacy**, and **task scope** vs **cost**. Rather than listing every possible provider, this section evaluates three setups that cover the most common situations in ML/AI work and that marimo supports natively: **Claude Code** (cloud agent), **OpenCode** (open-source agent), and **Ollama** (local inference).
+#### Agents
 
-#### Claude Code — best for marimo work, highest capability
+marimo supports external agents such as Claude Code, Codex, and Gemini CLI. These are useful when you want the assistant to work across multiple cells or operate on the notebook as a file rather than just generating one block of code at a time.
 
-Claude Code is a full agentic coding assistant from Anthropic that runs in your terminal alongside marimo. Of all the supported agents, it has the deepest integration with marimo: it understands the `@app.cell` structure natively, can reason about the reactive dependency graph, and has a dedicated guide in the marimo docs with slash commands, hooks, and skills specifically for notebook workflows.
+This matters because marimo notebooks are stored as plain `.py` files. External agents can read notebook structure directly instead of trying to reason over notebook JSON.
 
-Connect it from the marimo agents panel in the sidebar, or run it from the terminal in the same directory as your notebook. Once connected, Claude Code can read your entire `.py` notebook file, write and edit multiple cells autonomously, execute code, observe outputs, and iterate — without you managing the loop.
+#### MCP
 
-**Where it excels in ML work:**
-- Multi-cell refactors — "refactor this preprocessing pipeline into a reusable function and update all cells that call it"
-- Debugging dependency issues — it reads the reactive graph and understands what depends on what
-- Generating complete analysis sections from a description — "add a fairness analysis section that compares error rates across age groups"
-- Working with marimo-specific patterns — `mo.ui.*`, `mo.md()`, cell structure — without needing explanation
+marimo also supports the **Model Context Protocol (MCP)**:
 
-**The tradeoff:** It's a cloud service. Your notebook code and variable context are sent to Anthropic's API. For public datasets and research work this is fine. For proprietary data or model weights under NDA, it's not.
+- **as an MCP server** — marimo can expose notebook-aware AI tools to external applications
+- **as an MCP client** — marimo can connect MCP servers into its own Chat panel
 
-**Setup:**
-```bash
-npm install -g @anthropic-ai/claude-code
-claude  # authenticate once
-# Then connect from marimo's agents panel
-```
+In practice, this means notebook AI can become more connected and tool-aware. It can interact with documentation servers, notebook-aware services, or external coding environments through a standard protocol.
 
-Full guide: [docs.marimo.io/guides/generate_with_ai/using_claude_code](https://docs.marimo.io/guides/generate_with_ai/using_claude_code/)
+#### AI completion and copilots
 
----
+marimo also supports inline AI completion, which is lighter-weight than full cell generation. This covers:
 
-#### OpenCode — open-source agent, your choice of model
+- **GitHub Copilot**
+- **Windsurf**
+- **Custom copilots** through your own configured provider
 
-OpenCode is an open-source terminal-based coding agent that works with any LLM provider — including local models. It's the right choice when you want agent-level autonomy (read file, edit multiple cells, run and observe) but need flexibility over which model backs it, or want to avoid vendor lock-in.
+This is useful to mention because not every AI workflow needs a full agent. Sometimes completion inside the editor is enough.
 
-Because OpenCode is model-agnostic, you can point it at Claude, GPT-4, a Bedrock endpoint, or a local Ollama model. The agent behaviour — reading files, making edits, running commands — is the same regardless of the underlying model. This makes it useful as a transition path: start with a cloud model while you're learning, switch to a local model once your workflow is established and data sensitivity requires it.
+#### Local versus cloud-hosted setups
 
-**Where it excels:**
-- Teams that want a consistent agent interface across different model backends
-- Organisations that need to audit or customise agent behaviour (it's open source)
-- Researchers who want agent-level capability with a local model for sensitive data
+There is no single best setup. The right choice depends on cost, speed, privacy, and control.
 
-**The tradeoff:** Capability depends entirely on the model you choose. OpenCode with a frontier cloud model matches Claude Code closely. OpenCode with a local model has the same capability ceiling as that local model — which is meaningfully lower for complex reasoning tasks.
+**Cloud-hosted providers**
 
-**Setup:**
-```bash
-npm install -g opencode-ai
-opencode  # configure your preferred model
-# Then connect from marimo's agents panel
-```
+- usually stronger models
+- less local setup
+- faster to get started
+- less privacy and control over sensitive code or data
 
----
+**Local or private setups**
 
-#### Ollama — local inference, nothing leaves your machine
+- better for sensitive data and controlled environments
+- more privacy and more deployment control
+- often slower or less capable than frontier hosted models
+- more setup overhead
 
-Ollama runs open-weight models entirely on your local hardware. No API key, no data egress, no per-token cost. marimo routes inline AI requests to Ollama the same way it routes to any other provider — configure it once and the Generate with AI button and Chat panel work exactly as they do with cloud models.
+For marimo, Ollama is the most straightforward local path when you want notebook AI without sending notebook context to a hosted provider.
 
-**Where it excels:**
-- Proprietary datasets, patient data, unreleased model weights — anything that cannot leave your machine
-- Air-gapped research environments
-- Rapid inline generation of boilerplate — preprocessing functions, plot skeletons, metric cells — where frontier reasoning isn't needed
-- Cost-free iteration when you're doing high-volume repetitive generation
+#### Discussion prompt
 
-**The tradeoff:** Requires a machine with enough VRAM or RAM to run the model (16GB+ recommended for larger models). Inference is slower than cloud on equivalent hardware. For complex tasks — multi-cell architectural decisions, nuanced debugging — local models are noticeably less capable than frontier cloud models.
+After demonstrating AI-assisted coding in `module_3.py`, ask:
 
-#### Setting up Ollama
+- Which parts of this workflow would you trust to a hosted provider?
+- Which parts would you keep local because of privacy or control?
+- When is inline completion enough, and when do you actually want an agent?
 
-**Step 1 — Install.** Download from [ollama.com/download](https://ollama.com/download) and verify:
-
-```bash
-ollama --version
-```
-
-**Step 2 — Start the local server:**
-
-```bash
-ollama serve
-```
-
-This starts Ollama at `http://localhost:11434`. Keep this running in a terminal tab while you work.
-
-**Step 3 — Pull a code model.** For ML/data work, `qwen2.5-coder:7b` is a strong choice — capable on pandas, sklearn, and matplotlib patterns, fast on modern laptops:
-
-```bash
-ollama pull qwen2.5-coder:7b
-```
-
-Browse the full model library at [ollama.com/library](https://ollama.com/library). If `qwen2.5-coder:7b` feels slow on your hardware, try a smaller variant first.
-
-**Step 4 — Quick test in terminal:**
-
-```bash
-ollama run qwen2.5-coder:7b
-```
-
-Type a prompt. If it responds, the server is working.
-
-**Step 5 — Verify with Python** before connecting to marimo:
-
-```python
-import requests
-
-r = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5-coder:7b",
-        "prompt": "Write a pandas one-liner to drop rows with missing values.",
-        "stream": False,
-    },
-    timeout=60
-)
-r.raise_for_status()
-print(r.json()["response"])
-```
+That discussion ties the whole module together: AI quality depends on context, but the right setup depends on your constraints.
 
 Run this in a plain Python script first. If you get a clean response, you're ready to connect to marimo.
 
@@ -1035,21 +1101,6 @@ export OLLAMA_MODEL=qwen2.5-coder:7b
 
 ---
 
-#### Comparative evaluation
-
-The honest assessment across the three options for common ML/AI tasks:
-
-| Task | Claude Code | OpenCode + cloud | Ollama local |
-|---|---|---|---|
-| Generate a preprocessing cell | ✅ Excellent | ✅ Excellent | ✅ Good |
-| Refactor multi-cell pipeline | ✅ Excellent | ✅ Good | ⚠️ Limited |
-| Debug reactive dependency issue | ✅ Excellent | ✅ Good | ❌ Poor |
-| Generate a matplotlib figure | ✅ Excellent | ✅ Excellent | ✅ Good |
-| Sensitive/proprietary data | ❌ Cloud only | ⚠️ Depends on model | ✅ Safe |
-| Cost per session | Per token | Per token (cloud) / Free (local) | Free |
-| Setup complexity | Low | Medium | Medium |
-
-The pattern is clear: Claude Code wins on capability and marimo integration, Ollama wins on privacy and cost, OpenCode sits in the middle and gives you the agent interface without the vendor commitment.
 
 #### Hands-on: configure and evaluate
 

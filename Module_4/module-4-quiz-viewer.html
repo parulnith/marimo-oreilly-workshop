@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Module 4 Quiz Viewer</title>
+    <style>
+      :root {
+        --bg: #f6f3ee;
+        --panel: #fffdf9;
+        --ink: #1f2430;
+        --muted: #6b7280;
+        --accent: #0f766e;
+        --accent-2: #5eead4;
+        --border: #e7dfd3;
+        --success-bg: #eefbf3;
+        --success-border: #8fd3a7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(94, 234, 212, 0.18), transparent 28%),
+          radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 24%),
+          var(--bg);
+        color: var(--ink);
+      }
+
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 24px 56px;
+      }
+
+      .eyebrow {
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        line-height: 1.05;
+      }
+
+      .sub {
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .progress {
+        width: 100%;
+        height: 12px;
+        background: #ece4d8;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 28px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent-2), var(--accent));
+        transition: width 220ms ease;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(31, 36, 48, 0.06);
+      }
+
+      .question {
+        font-size: clamp(1.3rem, 2.6vw, 2rem);
+        line-height: 1.3;
+        margin: 0 0 24px;
+      }
+
+      .options {
+        display: grid;
+        gap: 12px;
+      }
+
+      .option {
+        border: 1px solid var(--border);
+        background: white;
+        border-radius: 18px;
+        padding: 16px 18px;
+        font-size: 1rem;
+        line-height: 1.45;
+        cursor: pointer;
+        transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+      }
+
+      .option:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent);
+      }
+
+      .option.selected {
+        border-color: var(--accent);
+        background: #ecfdfa;
+      }
+
+      .option.correct {
+        border-color: #4ca66a;
+        background: #eefbf3;
+      }
+
+      .option.dimmed {
+        opacity: 0.68;
+      }
+
+      .answer-panel {
+        margin-top: 24px;
+        padding: 18px 20px;
+        border-radius: 18px;
+        border: 1px solid var(--success-border);
+        background: var(--success-bg);
+        display: none;
+      }
+
+      .answer-panel.show {
+        display: block;
+      }
+
+      .answer-title {
+        margin: 0 0 8px;
+        font-weight: 700;
+      }
+
+      .answer-text {
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .controls-left,
+      .controls-right {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn-neutral {
+        background: #ece4d8;
+        color: var(--ink);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+
+      .btn-muted {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .timer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fffcf6;
+      }
+
+      .timer-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .timer-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .timer-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+
+      .timer-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 680px) {
+        .wrap {
+          padding: 24px 16px 40px;
+        }
+
+        .card {
+          padding: 20px;
+          border-radius: 18px;
+        }
+
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .controls-left,
+        .controls-right {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="eyebrow">Workshop Quiz</div>
+      <h1>Module 4 Checkpoint</h1>
+      <p class="sub">
+        AI-assisted notebook work with marimo, Ollama, agents, and MCP.
+      </p>
+
+      <div class="progress-meta">
+        <span id="progress-label">Question 1 of 5</span>
+        <span id="module-label">Prompting, notebook context, local models, and connected tools</span>
+      </div>
+      <div class="progress" aria-hidden="true">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="question" id="question"></h2>
+
+        <div class="timer-row">
+          <div class="timer-copy">
+            <span class="timer-label">Question Timer</span>
+            <span class="timer-value" id="timer-value">5s</span>
+          </div>
+          <div class="timer-controls">
+            <button class="btn-muted" id="start-timer-btn">Start 5s Timer</button>
+            <button class="btn-muted" id="reset-timer-btn">Reset Timer</button>
+          </div>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="answer-panel" id="answer-panel">
+          <p class="answer-title" id="answer-title"></p>
+          <p class="answer-text" id="answer-text"></p>
+        </div>
+
+        <div class="controls">
+          <div class="controls-left">
+            <button class="btn-neutral" id="prev-btn">Previous</button>
+            <button class="btn-neutral" id="next-btn">Next</button>
+          </div>
+          <div class="controls-right">
+            <button class="btn-muted" id="reset-btn">Reset Question</button>
+            <button class="btn-muted" id="retake-btn">Retake Quiz</button>
+            <button class="btn-primary" id="reveal-btn">Reveal Answer</button>
+          </div>
+        </div>
+
+        <p class="footer-note">
+          Shortcuts: <strong>1–4</strong> select option, <strong>space</strong> reveal/next, <strong>←/→</strong> previous/next.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          question: "What is the core idea of Module 4?",
+          options: [
+            "AI agents should replace notebook work entirely",
+            "Better notebook context leads to better AI assistance",
+            "Only cloud models are useful for AI coding",
+            "Prompts matter less than model size",
+          ],
+          answer: 1,
+          explanation:
+            "Module 4 focuses on using AI coding tools effectively inside notebook workflows, with the main idea that richer context usually produces better assistance.",
+        },
+        {
+          question: "Why does `@df` or `@column_selector` improve prompting in marimo?",
+          options: [
+            "It shortens variable names automatically",
+            "It gives the assistant notebook state, not just notebook text",
+            "It forces the model to use matplotlib",
+            "It disables tool access in the chat panel",
+          ],
+          answer: 1,
+          explanation:
+            "The `@` syntax passes notebook variables and current state into the assistant, so it can work from the actual live context instead of guessing from code alone.",
+        },
+        {
+          question: "Which statement best describes marimo's MCP support?",
+          options: [
+            "marimo only acts as an MCP client",
+            "marimo only acts as an MCP server",
+            "marimo can act as both an MCP server and an MCP client",
+            "MCP in marimo is only for exporting notebooks",
+          ],
+          answer: 2,
+          explanation:
+            "According to the docs, marimo supports MCP in two ways: it can expose notebook-aware tools to external applications and it can also connect supported MCP servers into its own chat panel.",
+        },
+        {
+          question: "What does `ollama launch claude --model qwen3-coder-next:cloud` illustrate in this module?",
+          options: [
+            "Running marimo without Python installed",
+            "Launching Claude Code through Ollama for a broader coding-agent workflow",
+            "Connecting marimo's chat panel to Hugging Face",
+            "Exporting a notebook to HTML",
+          ],
+          answer: 1,
+          explanation:
+            "That command shows how Ollama can be used not only for local notebook completion, but also to launch an external coding agent workflow through Claude Code.",
+        },
+        {
+          question: "When would local Ollama usually be the better fit than a hosted provider in this module?",
+          options: [
+            "When notebook privacy and local control matter more than using the largest hosted model",
+            "When you want to avoid running any local software",
+            "When you need MCP disabled",
+            "When you only want markdown generation",
+          ],
+          answer: 0,
+          explanation:
+            "The local Ollama path is the pragmatic choice when you want notebook-aware AI assistance without sending notebook context to a hosted provider.",
+        },
+      ];
+
+      let currentIndex = 0;
+      let selectedIndex = null;
+      let revealed = false;
+      let timerSeconds = 5;
+      let timerId = null;
+
+      const questionEl = document.getElementById("question");
+      const optionsEl = document.getElementById("options");
+      const answerPanelEl = document.getElementById("answer-panel");
+      const answerTitleEl = document.getElementById("answer-title");
+      const answerTextEl = document.getElementById("answer-text");
+      const progressLabelEl = document.getElementById("progress-label");
+      const progressBarEl = document.getElementById("progress-bar");
+      const timerValueEl = document.getElementById("timer-value");
+
+      const prevBtn = document.getElementById("prev-btn");
+      const nextBtn = document.getElementById("next-btn");
+      const revealBtn = document.getElementById("reveal-btn");
+      const resetBtn = document.getElementById("reset-btn");
+      const retakeBtn = document.getElementById("retake-btn");
+      const startTimerBtn = document.getElementById("start-timer-btn");
+      const resetTimerBtn = document.getElementById("reset-timer-btn");
+
+      function stopTimer() {
+        if (timerId !== null) {
+          window.clearInterval(timerId);
+          timerId = null;
+        }
+      }
+
+      function resetTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+      }
+
+      function startTimer() {
+        stopTimer();
+        timerSeconds = 5;
+        timerValueEl.textContent = `${timerSeconds}s`;
+        timerId = window.setInterval(() => {
+          timerSeconds -= 1;
+          timerValueEl.textContent = `${timerSeconds}s`;
+          if (timerSeconds <= 0) {
+            stopTimer();
+          }
+        }, 1000);
+      }
+
+      function render() {
+        const q = questions[currentIndex];
+        questionEl.textContent = q.question;
+        progressLabelEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+        progressBarEl.style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+
+        optionsEl.innerHTML = "";
+        q.options.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.className = "option";
+          button.type = "button";
+          button.innerHTML = `<strong>${String.fromCharCode(65 + index)}.</strong> ${option}`;
+
+          if (selectedIndex === index) {
+            button.classList.add("selected");
+          }
+
+          if (revealed) {
+            if (index === q.answer) {
+              button.classList.add("correct");
+            } else {
+              button.classList.add("dimmed");
+            }
+          }
+
+          button.addEventListener("click", () => {
+            if (revealed) return;
+            selectedIndex = index;
+            render();
+          });
+
+          optionsEl.appendChild(button);
+        });
+
+        if (revealed) {
+          answerPanelEl.classList.add("show");
+          answerTitleEl.textContent =
+            selectedIndex === q.answer
+              ? "Correct"
+              : `Answer: ${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}`;
+          answerTextEl.textContent = q.explanation;
+          revealBtn.textContent = currentIndex === questions.length - 1 ? "Quiz Complete" : "Next Question";
+        } else {
+          answerPanelEl.classList.remove("show");
+          answerTitleEl.textContent = "";
+          answerTextEl.textContent = "";
+          revealBtn.textContent = "Reveal Answer";
+        }
+
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === questions.length - 1;
+      }
+
+      function nextQuestion() {
+        if (currentIndex < questions.length - 1) {
+          currentIndex += 1;
+          selectedIndex = null;
+          revealed = false;
+          resetTimer();
+          render();
+        }
+      }
+
+      function prevQuestion() {
+        if (currentIndex > 0) {
+          currentIndex -= 1;
+          selectedIndex = null;
+          revealed = false;
+          resetTimer();
+          render();
+        }
+      }
+
+      revealBtn.addEventListener("click", () => {
+        if (!revealed) {
+          revealed = true;
+          render();
+        } else {
+          nextQuestion();
+        }
+      });
+
+      nextBtn.addEventListener("click", nextQuestion);
+      prevBtn.addEventListener("click", prevQuestion);
+      resetBtn.addEventListener("click", () => {
+        selectedIndex = null;
+        revealed = false;
+        resetTimer();
+        render();
+      });
+      retakeBtn.addEventListener("click", () => {
+        currentIndex = 0;
+        selectedIndex = null;
+        revealed = false;
+        resetTimer();
+        render();
+      });
+      startTimerBtn.addEventListener("click", startTimer);
+      resetTimerBtn.addEventListener("click", resetTimer);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === " ") {
+          event.preventDefault();
+          if (!revealed) {
+            revealed = true;
+            render();
+          } else {
+            nextQuestion();
+          }
+        }
+
+        if (!revealed && ["1", "2", "3", "4"].includes(event.key)) {
+          selectedIndex = Number(event.key) - 1;
+          render();
+        }
+
+        if (event.key === "ArrowRight") {
+          nextQuestion();
+        }
+
+        if (event.key === "ArrowLeft") {
+          prevQuestion();
+        }
+      });
+
+      resetTimer();
+      render();
+    </script>
+  </body>
+</html>

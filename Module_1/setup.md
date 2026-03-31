@@ -14,9 +14,20 @@ You can also start a fresh notebook directly from:
 
 This opens marimo in the browser using Molab.
 
-## local setup: install with `pip`
+## Local setup
 
-If you want to work locally, this is the easiest option for most participants.
+If you want to work locally, start by cloning the workshop repository and creating the virtual environment inside it.
+
+## Clone the workshop repository
+
+```bash
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
+```
+
+## Install marimo with `pip`
+
+This is the easiest local option for most participants.
 
 ### Mac / Linux
 
@@ -43,37 +54,6 @@ marimo tutorial intro
 ```
 
 This is a good way to quickly see the main parts of the marimo interface before moving into the course materials.
-
-## Clone the workshop repository
-
-Once marimo is installed, clone the workshop repository and move into it.
-
-```bash
-git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
-cd marimo-for-ai-and-ml-development-oreilly-workshop
-```
-
-If you want the virtual environment inside the repo folder, you can create and activate it there before installing marimo.
-
-### Mac / Linux
-
-```bash
-git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
-cd marimo-for-ai-and-ml-development-oreilly-workshop
-python3 -m venv .venv
-source .venv/bin/activate
-pip install marimo
-```
-
-### Windows PowerShell
-
-```powershell
-git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
-cd marimo-for-ai-and-ml-development-oreilly-workshop
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install marimo
-```
 
 ## Optional: install with `uv`
 
@@ -125,18 +105,7 @@ Use script mode when you want to execute a notebook as normal Python:
 python Module_1/marimo-reactive-workflow.py
 ```
 
-## First commands to try
-
-After cloning the repo and installing marimo, these are good first checks:
-
-```bash
-marimo tutorial intro
-marimo edit Module_1/marimo-reactive-workflow.py
-marimo run Module_1/marimo-reactive-workflow-with-sliders.py
-python Module_1/marimo-reactive-workflow.py
-```
-
-## Sandbox mode
+### Sandbox mode
 
 Later in the workshop, we will use sandbox mode for reproducibility:
 
@@ -145,18 +114,3 @@ marimo edit --sandbox notebook.py
 ```
 
 This gives a notebook its own isolated environment.
-
-## Workshop files in Module 1
-
-- `jupyter-notebook-failure-modes.ipynb`
-- `marimo-reactive-workflow.py`
-- `marimo-reactive-workflow-with-sliders.py`
-
-## One thing to remember
-
-In marimo, notebooks are plain Python files ending in `.py`.  
-The same file can be:
-
-- edited interactively
-- run as an app
-- executed as a script

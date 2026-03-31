@@ -9,20 +9,19 @@
 
 import marimo
 
-__generated_with = "0.16.2"
+__generated_with = "0.20.4"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-    # The Same Workflow, Reactively
+    mo.md(r"""
+    # The Same Workflow, Reactively with marimo
+
 
     We start with the same **plain compound-interest workflow** from Section 1.2:
     fixed parameters, a helper function, a computed result, a plot, a table.
-    """
-    )
+    """)
     return
 
 
@@ -32,6 +31,7 @@ def _():
     import matplotlib.pyplot as plt
     import pandas as pd
     import time
+
     return mo, pd, plt
 
 
@@ -77,13 +77,11 @@ def _(growth, plt, years):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ## Compare multiple interest rates
 
     Same idea as before, but the table stays aligned automatically with the current inputs.
-    """
-    )
+    """)
     return
 
 
