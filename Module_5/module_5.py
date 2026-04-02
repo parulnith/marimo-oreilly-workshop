@@ -1,12 +1,6 @@
 # /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#     "marimo",
-#     "polars",
-#     "altair",
-#     "scikit-learn",
-#     "numpy",
-# ]
+# requires-python = ">=3.10"
+# dependencies = ["marimo", "openai", "pandas", "altair"]
 # ///
 
 import marimo
@@ -14,224 +8,304 @@ import marimo
 __generated_with = "0.20.4"
 app = marimo.App(width="medium")
 
+with app.setup:
+    import marimo as mo
+    import pandas as pd
+    import altair as alt
+    import json
+    import os
+    from openai import OpenAI
+
+    SYSTEM_PROMPT = (
+        "You are a sentiment classifier. "
+        "Classify the sentiment of the product review given by the user. "
+        'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", "confidence": <0.0-1.0>, "reason": "<one sentence>"}'
+    )
+
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
-    # Wine Classifier — An Interactive ML Pipeline
+    # Module 5: From Interactive Work to Reusable Systems
 
-    This notebook trains a **Random Forest** on the
-    [UCI Wine dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#wine-dataset)
-    (178 samples · 13 chemical features · 3 wine classes).
+    Everything you have built across this workshop lives in a single `.py` file.
 
-    Use the sliders to tune the model and watch accuracy, feature importance,
-    and the confusion matrix update reactively.
+    This module closes that gap. The working example is an **LLM sentiment
+    classifier** — a notebook that sends product reviews to a local Ollama model
+    and returns labels with confidence scores.
+
+    By the end, the same file will run in four modes
 
     | Mode | Command |
     |------|---------|
     | Interactive notebook | `marimo edit module_5.py` |
     | Clean web app | `marimo run module_5.py` |
-    | Headless script | `python module_5.py --n-estimators 200 --max-depth 5` |
-    | Importable module | `from module_5 import load_wine_data, train_classifier` |
+    | Headless script | `python module_5.py -- --model-a gemma3:1b --model-b qwen2.5:0.5b` |
+    | Importable module | `from module_5 import get_client, classify_batch` |
+    """)
+    return
+
+
+@app.function
+def get_client(base_url="http://localhost:11434/v1", api_key="ollama"):
+    return OpenAI(base_url=base_url, api_key=api_key or os.getenv("OPENAI_API_KEY", "ollama"))
+
+
+@app.function
+def classify_text(client, text, model="gemma3:1b"):
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": text},
+            ],
+            temperature=0.0,
+        )
+        raw = (response.choices[0].message.content or "").strip().strip("```json").strip("```").strip()
+        parsed = json.loads(raw)
+        return {
+            "text": text,
+            "label": parsed.get("label", "neutral"),
+            "confidence": round(float(parsed.get("confidence", 0.5)), 3),
+            "reason": parsed.get("reason", ""),
+            "model": model,
+            "error": None,
+        }
+    except Exception as exc:
+        return {"text": text, "label": "error", "confidence": 0.0, "reason": str(exc), "model": model, "error": str(exc)}
+
+
+@app.function
+def classify_batch(client, texts, model="gemma3:1b"):
+    return pd.DataFrame([classify_text(client, t, model) for t in texts])
+
+
+@app.function
+def summarize_results(df):
+    ok = df[df["label"] != "error"]
+    return {
+        "total": len(df),
+        "successful": len(ok),
+        "label_counts": ok["label"].value_counts().to_dict() if len(ok) else {},
+        "avg_confidence": round(float(ok["confidence"].mean()), 3) if len(ok) else 0.0,
+    }
+
+
+@app.function
+def filter_by_label(df, label="All"):
+    if label == "All":
+        return df
+    return df[df["label"] == label].reset_index(drop=True)
+
+
+@app.function
+def sample_reviews():
+    return [
+        "Absolutely love this product! Fast shipping and works perfectly.",
+        "Terrible experience. Broke after two days and support was unhelpful.",
+        "It's okay. Does what it says but nothing special.",
+        "Exceeded my expectations. Highly recommend to anyone looking for quality.",
+        "Packaging was damaged, product inside seemed fine but I'm not happy.",
+        "Great value for money. Using it daily for three months with no issues.",
+        "Instructions were confusing and setup took way too long.",
+        "Customer service responded quickly and resolved my issue same day.",
+        "Average product. Works but feels a bit cheap.",
+        "Would not buy again. Stopped working after a week.",
+    ]
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ## LLM Model Comparison
+
+    Run the same reviews through **two Ollama models** side by side.
+    Mark each classification correct ✓ or incorrect ✗ to build a live accuracy dashboard.
+
+    Make sure Ollama is running first: `ollama serve`
     """)
     return
 
 
 @app.cell
 def _():
-    import marimo as mo
-    import polars as pl
-    import altair as alt
-
-    return alt, mo, pl
-
-
-@app.cell
-def _(load_wine_data):
-    wine_df, feature_names, class_names = load_wine_data()
-    return class_names, feature_names, wine_df
-
-
-@app.cell(hide_code=True)
-def _(mo, wine_df):
-    mo.md(f"""
-    #### Dataset
-
-    **{wine_df.shape[0]} samples · {wine_df.shape[1] - 1} features · 3 classes**
-    (Barolo, Grignolino, Barbera)
-    """)
-    return
-
-
-@app.cell
-def _(mo, wine_df):
-    mo.ui.dataframe(wine_df)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Model Configuration
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    n_estimators_ui = mo.ui.slider(10, 300, value=100, step=10, label="Number of trees")
-    max_depth_ui = mo.ui.slider(0, 20, value=0, step=1, label="Max depth (0 = unlimited)")
-    test_size_ui = mo.ui.slider(0.1, 0.4, value=0.2, step=0.05, label="Test size")
-    mo.vstack([n_estimators_ui, max_depth_ui, test_size_ui])
-    return max_depth_ui, n_estimators_ui, test_size_ui
-
-
-@app.cell
-def _(
-    feature_names,
-    max_depth_ui,
-    n_estimators_ui,
-    test_size_ui,
-    train_classifier,
-    wine_df,
-):
-    model, X_test, y_test = train_classifier(
-        wine_df,
-        feature_names,
-        n_estimators=n_estimators_ui.value,
-        max_depth=max_depth_ui.value,
-        test_size=test_size_ui.value,
+    base_url_input = mo.ui.text(
+        value="http://localhost:11434/v1",
+        label="Ollama base URL",
+        full_width=True,
     )
-    return X_test, model, y_test
+    model_a_input = mo.ui.text(
+        value="gemma3:1b",
+        label="Model A",
+        placeholder="e.g. gemma3:1b",
+    )
+    model_b_input = mo.ui.text(
+        value="qwen2.5:0.5b",
+        label="Model B",
+        placeholder="e.g. qwen2.5:0.5b",
+    )
+    reviews_input = mo.ui.text_area(
+        value="\n".join([
+            "Absolutely love this product! Fast shipping and works perfectly.",
+            "Terrible experience. Broke after two days and support was unhelpful.",
+            "It's okay. Does what it says but nothing special.",
+            "Exceeded my expectations. Highly recommend to anyone looking for quality.",
+            "Packaging was damaged, product inside seemed fine but I'm not happy.",
+            "Great value for money. Using it daily for three months with no issues.",
+            "Instructions were confusing and setup took way too long.",
+            "Customer service responded quickly and resolved my issue same day.",
+            "Average product. Works but feels a bit cheap.",
+            "Would not buy again. Stopped working after a week.",
+        ]),
+        label="Reviews to classify (one per line — edit, add or replace)",
+        full_width=True,
+        rows=10,
+    )
+    run_btn = mo.ui.run_button(label="Classify with both models", kind="success")
+    mo.vstack([
+        base_url_input,
+        mo.hstack([model_a_input, model_b_input], justify="start"),
+        reviews_input,
+        run_btn,
+    ])
+    return base_url_input, model_a_input, model_b_input, reviews_input, run_btn
 
 
 @app.cell
-def _(X_test, evaluate_model, model, y_test):
-    metrics = evaluate_model(model, X_test, y_test)
-    return (metrics,)
+def _(base_url_input, model_a_input, model_b_input, reviews_input, run_btn):
+    mo.stop(
+        not run_btn.value,
+        mo.md("_Fill in both models and click **Classify with both models** to start._"),
+    )
+    _texts = [r.strip() for r in reviews_input.value.splitlines() if r.strip()]
+    mo.stop(not _texts, mo.md("_No reviews to classify._"))
+    mo.stop(not model_a_input.value.strip(), mo.md("_Enter Model A._"))
+    mo.stop(not model_b_input.value.strip(), mo.md("_Enter Model B._"))
+
+    _client = get_client(base_url=base_url_input.value)
+    _df_a = classify_batch(_client, _texts, model=model_a_input.value.strip())
+    _df_b = classify_batch(_client, _texts, model=model_b_input.value.strip())
+    results_df = pd.concat([_df_a, _df_b], ignore_index=True)
+    results_df
+    return (results_df,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
-    ## Model Performance
+    ### Mark each classification correct or incorrect
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(metrics, mo):
+def _(model_a_input, model_b_input, results_df):
+    _model_a = model_a_input.value.strip()
+    _model_b = model_b_input.value.strip()
+    _df_a = results_df[results_df["model"] == _model_a].reset_index(drop=True)
+    _df_b = results_df[results_df["model"] == _model_b].reset_index(drop=True)
+    _n = len(_df_a)
+    _label_color = {"positive": "🟢", "negative": "🔴", "neutral": "🟡", "error": "⚠️"}
+
+    verdicts_a = mo.ui.array(
+        [mo.ui.checkbox(label="correct") for _ in range(_n)],
+        label=f"{_model_a} verdicts",
+    )
+    verdicts_b = mo.ui.array(
+        [mo.ui.checkbox(label="correct") for _ in range(_n)],
+        label=f"{_model_b} verdicts",
+    )
+
+    _header = mo.hstack([
+        mo.md("**Review**"),
+        mo.md(f"**{_model_a}**"),
+        mo.md(f"**{_model_b}**"),
+    ], justify="start", widths=[4, 2, 2])
+
+    _rows = [_header]
+    for _i in range(_n):
+        _a = _df_a.iloc[_i]
+        _b = _df_b.iloc[_i]
+        _rows.append(mo.hstack([
+            mo.md(f"*{_a['text'][:80]}{'…' if len(_a['text']) > 80 else ''}*"),
+            mo.vstack([
+                mo.md(f"{_label_color.get(_a['label'], '')} **{_a['label']}** ({_a['confidence']:.0%})"),
+                verdicts_a.elements[_i],
+            ]),
+            mo.vstack([
+                mo.md(f"{_label_color.get(_b['label'], '')} **{_b['label']}** ({_b['confidence']:.0%})"),
+                verdicts_b.elements[_i],
+            ]),
+        ], justify="start", widths=[4, 2, 2]))
+
+    mo.vstack(_rows)
+    return verdicts_a, verdicts_b
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ### Accuracy Dashboard
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
+    _model_a = model_a_input.value.strip()
+    _model_b = model_b_input.value.strip()
+    _n = len(verdicts_a.value)
+    _correct_a = sum(verdicts_a.value)
+    _correct_b = sum(verdicts_b.value)
+    _acc_a = _correct_a / _n if _n else 0
+    _acc_b = _correct_b / _n if _n else 0
+    _winner = _model_a if _acc_a > _acc_b else (_model_b if _acc_b > _acc_a else "Tie")
+
     mo.hstack([
-        mo.stat(value=f"{metrics['accuracy']:.1%}", label="Accuracy"),
-        mo.stat(value=f"{metrics['f1_macro']:.1%}", label="Macro F1"),
-        mo.stat(value=str(len(metrics["y_test"])), label="Test samples"),
+        mo.stat(value=f"{_acc_a:.0%}", label=f"{_model_a} accuracy", caption=f"{_correct_a}/{_n} correct"),
+        mo.stat(value=f"{_acc_b:.0%}", label=f"{_model_b} accuracy", caption=f"{_correct_b}/{_n} correct"),
+        mo.stat(value=_winner, label="Better model"),
     ])
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Feature Importance
-    """)
-    return
-
-
-@app.cell
-def _(alt, feature_names, model, pl):
-    _fi_df = pl.DataFrame({
-        "Feature": feature_names,
-        "Importance": model.feature_importances_.tolist(),
-    }).sort("Importance", descending=True)
-
-    alt.Chart(_fi_df).mark_bar(color="#4C72B0").encode(
-        x=alt.X("Importance:Q", title="Mean decrease in impurity"),
-        y=alt.Y("Feature:N", sort="-x", title=None),
-        tooltip=["Feature:N", alt.Tooltip("Importance:Q", format=".3f")],
-    ).properties(title="Feature Importance (Random Forest)", width=550, height=320)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Confusion Matrix
-    """)
-    return
-
-
-@app.cell
-def _(alt, class_names, metrics, pl):
-    from sklearn.metrics import confusion_matrix as _cm_fn
-
-    _cm = _cm_fn(metrics["y_test"], metrics["y_pred"])
-    _rows = [
-        {"Actual": class_names[i], "Predicted": class_names[j], "Count": int(_cm[i][j])}
-        for i in range(3)
-        for j in range(3)
-    ]
-    _cm_df = pl.DataFrame(_rows)
-
-    _base = alt.Chart(_cm_df)
-    (
-        _base.mark_rect().encode(
-            x=alt.X("Predicted:N", title="Predicted label"),
-            y=alt.Y("Actual:N", title="True label"),
-            color=alt.Color("Count:Q", scale=alt.Scale(scheme="blues"), legend=None),
-            tooltip=["Actual:N", "Predicted:N", "Count:Q"],
+def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
+    _model_a = model_a_input.value.strip()
+    _model_b = model_b_input.value.strip()
+    _n = len(verdicts_a.value)
+    _summary_df = pd.DataFrame({
+        "Model": [_model_a, _model_b],
+        "Correct": [sum(verdicts_a.value), sum(verdicts_b.value)],
+        "Incorrect": [_n - sum(verdicts_a.value), _n - sum(verdicts_b.value)],
+        "Accuracy": [
+            sum(verdicts_a.value) / _n if _n else 0,
+            sum(verdicts_b.value) / _n if _n else 0,
+        ],
+    })
+    _melted = _summary_df.melt(id_vars="Model", value_vars=["Correct", "Incorrect"], var_name="Verdict", value_name="Count")
+    _chart = (
+        alt.Chart(_melted).mark_bar()
+        .encode(
+            x=alt.X("Model:N", title=None, axis=alt.Axis(labelAngle=0)),
+            y=alt.Y("Count:Q", title="Reviews"),
+            color=alt.Color("Verdict:N", scale=alt.Scale(domain=["Correct", "Incorrect"], range=["#55A868", "#C44E52"])),
+            tooltip=["Model:N", "Verdict:N", "Count:Q"],
         )
-        + _base.mark_text(fontSize=16, fontWeight="bold").encode(
-            x="Predicted:N",
-            y="Actual:N",
-            text="Count:Q",
-            color=alt.condition(
-                alt.datum.Count > int(_cm.max() / 2),
-                alt.value("white"),
-                alt.value("black"),
-            ),
+        .properties(title="Correct vs Incorrect by Model", width=300, height=240)
+    )
+    _acc_chart = (
+        alt.Chart(_summary_df).mark_bar()
+        .encode(
+            x=alt.X("Model:N", title=None, axis=alt.Axis(labelAngle=0)),
+            y=alt.Y("Accuracy:Q", title="Accuracy", scale=alt.Scale(domain=[0, 1]), axis=alt.Axis(format=".0%")),
+            color=alt.Color("Model:N", legend=None),
+            tooltip=["Model:N", alt.Tooltip("Accuracy:Q", format=".0%")],
         )
-    ).properties(title="Confusion Matrix", width=280, height=240)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Reuse as a Module
-
-    Because `module_5.py` is plain Python, you can import its functions
-    directly from another script — no conversion, no copy-paste:
-
-    ```python
-    # pipeline.py
-    from module_5 import load_wine_data, train_classifier, evaluate_model
-
-    df, features, classes = load_wine_data()
-    model, X_test, y_test = train_classifier(df, features, n_estimators=200)
-    metrics = evaluate_model(model, X_test, y_test)
-    print(f"Accuracy: {metrics['accuracy']:.1%}")
-    ```
-
-    The interactive notebook and the production pipeline share the **same
-    source of truth** — edit once, run everywhere.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Run as a Script
-
-    Pass hyperparameters from the command line for headless automation:
-
-    ```bash
-    python module_5.py --n-estimators 200 --max-depth 5 --test-size 0.25
-    ```
-
-    Schedule with cron or a GitHub Action — the same notebook that runs
-    interactively here becomes a reproducible pipeline step with no changes.
-    """)
+        .properties(title="Accuracy by Model", width=300, height=240)
+    )
+    mo.hstack([_chart, _acc_chart])
     return
 
 
