@@ -1,6 +1,5 @@
 ## Module 4: How to Use AI Coding Agents for AI/ML Development
-AI coding agents are most useful when they are integrated directly into your development environment and can work with the actual state of your notebook. While coding assistants can write code but for ML/AI, it makes more sense that they also have context about 
-dataframes, model outputs, variables, and dependencies in memory.
+AI coding agents are most useful when they are integrated directly into your development environment and can work with the actual state of your notebook. While coding assistants can write code but for ML/AI, it makes more sense that they also have context about dataframes, model outputs, variables, and dependencies in memory.
 
  In ML and AI workflows, their value depends on:
 
@@ -13,16 +12,6 @@ The core idea of this module is better context leads to better AI assistance, an
 
 ### Hands-on Exercise (guided in marimo)
 
-Use marimo's AI features inside `Module_4/module_4.py`:
-
-- generate or modify code directly in the active notebook
-- refactor an existing cell without leaving the editor
-- provide explicit variable context such as `@df`
-- compare the quality of a low-context prompt and a context-rich prompt
-- discuss the tradeoffs between local and cloud-hosted setups
-
-
----
 
 ### AI-assisted coding in marimo
 
@@ -187,16 +176,6 @@ Once configured, those tools are available in the Chat panel when using Ask mode
 
 Source: https://docs.marimo.io/guides/editor_features/mcp/
 
-#### AI completion and copilots
-
-marimo also supports inline AI completion, which is lighter-weight than full cell generation. This covers:
-
-- **GitHub Copilot**
-- **Windsurf**
-- **Custom copilots** through your own configured provider
-
-
-This is useful to mention because not every AI workflow needs a full agent. Sometimes completion inside the editor is enough.
 
 ---
 
