@@ -12,7 +12,7 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
@@ -38,6 +38,7 @@ def _(mo):
 def _():
     import marimo as mo
     import numpy as np
+    import pandas as pd
     import matplotlib.pyplot as plt
     from sklearn.datasets import fetch_openml
     from sklearn.metrics import roc_auc_score
@@ -53,6 +54,7 @@ def _():
         fetch_openml,
         mo,
         np,
+        pd,
         plt,
         roc_auc_score,
         train_test_split,
@@ -231,7 +233,7 @@ def _(
 
     X = sampled_df[selected_features].copy()
     encoder_map = {}
-    for col in X.select_dtypes(include="object").columns:
+    for col in X.select_dtypes(include=["object", "category"]).columns:
         enc = LabelEncoder()
         X[col] = enc.fit_transform(X[col].astype(str))
         encoder_map[col] = enc
@@ -519,7 +521,7 @@ def _(
         | False negatives | `{len(fn):,}` |
         """
     )
-    return display_errors, results_df
+    return display_errors, pd, results_df
 
 
 @app.cell
@@ -546,7 +548,9 @@ def _(display_errors, mo, preview_rows):
 
 
 @app.cell
-def _(error_table, mo, results_df):
+def _(error_table, mo, pd, results_df):
+
+
     selected = error_table.value
     mo.stop(
         len(selected) == 0,
@@ -556,13 +560,14 @@ def _(error_table, mo, results_df):
         ),
     )
 
+    selected_cols = list(selected.columns) if isinstance(selected, pd.DataFrame) else []
     stats_cols = [
         col
         for col in ["age", "hours-per-week", "education-num", "capital-gain", "proba_positive"]
-        if col in selected.columns and col in results_df.columns
+        if col in selected_cols and col in results_df.columns
     ]
     rows_md = "\n".join(
-        f"| `{col}` | {selected[col].mean():.2f} | {results_df[col].mean():.2f} |"
+        f"| `{col}` | {selected[col].mean():.2f} | {results_df[col].mean():.2f} |"  # ty:ignore[invalid-argument-type, not-subscriptable]
         for col in stats_cols
     )
     mo.vstack(
