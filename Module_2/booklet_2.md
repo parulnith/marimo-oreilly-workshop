@@ -29,7 +29,7 @@ Environmental drift comes from three sources.
 **Python itself** changes behaviour across versions. 
 **Transitive dependencies** shift when anything upstream updates.
 
-The usual fix is a `requirements.txt`. But it lives outside the notebook and depends on manual updates. It goes out of date quickly.
+The usual fix is a `requirements.txt`. But it lives outside the notebook and depends on manual updates. Reproducibility needs to be built into the environment itself.
 
 #### How marimo solves this: inline dependencies
 
@@ -46,6 +46,7 @@ If you import a missing library, marimo prompts you to install it and updates th
 > marimo edit --sandbox Module_2/2.2.py
 > ```
 
+### 2.3 Version Control and Reviewable Experiments
 
 #### The file format problem
 

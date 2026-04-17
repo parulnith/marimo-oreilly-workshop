@@ -1,14 +1,20 @@
 import marimo
 
+__generated_with = "0.23.1"
 app = marimo.App()
 
 
 @app.cell
 def _():
     x = 10
-    y = 20
+    y = 30
     print("Sum =", x + y)
-    return x, y
+    return
+
+
+@app.cell
+def _():
+    return
 
 
 if __name__ == "__main__":

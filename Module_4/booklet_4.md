@@ -242,6 +242,97 @@ The main point is not to pick one tool universally. It is to understand the trad
 
 The right AI setup is the one that fits your data constraints, your workflow speed, and your task complexity. What all three options share is marimo's automatic variable context — your current state is always available to the agent, so your prompts stay short and your iterations stay fast regardless of which model is doing the work.
 
+---
+
+### 4.5 marimo check: linting for agents and humans
+
+AI coding agents are capable of writing marimo notebooks quickly, but they sometimes violate marimo-specific rules — like redefining a variable across two cells, or creating a circular dependency. `marimo check` gives both you and your agent a fast feedback loop to catch and fix these issues before running the notebook.
+
+#### What it catches
+
+`marimo check` focuses exclusively on marimo-specific correctness rules. It deliberately does not duplicate what tools like `ruff` or `mypy` already do. Key checks include:
+
+- **Multiple definitions** — the same variable name defined in more than one cell
+- **Circular dependencies** — cell A depends on cell B, which depends on cell A
+- **Formatting issues** — notebook structure that marimo cannot parse or execute reliably
+
+Error messages are actionable: they tell you exactly which cells conflict and suggest fixes (for example, renaming a variable with an underscore prefix to make it cell-local).
+
+#### Running the linter
+
+Check a single notebook:
+
+```bash
+marimo check notebook.py
+```
+
+Check all notebooks in the current directory:
+
+```bash
+marimo check .
+```
+
+#### Automated fixes
+
+For issues with obvious solutions, pass `--fix` to let marimo resolve them automatically:
+
+```bash
+marimo check --fix notebook.py
+```
+
+For more complex issues where the fix might change behaviour, use `--unsafe-fixes`:
+
+```bash
+marimo check --unsafe-fixes notebook.py
+```
+
+This is useful after an AI agent generates a notebook — run `marimo check --fix` as a cleanup step before opening the notebook.
+
+#### JSON output for agents
+
+When an agent is doing the linting loop itself, the `--format=json` flag makes the output machine-readable:
+
+```bash
+marimo check --format=json notebook.py | jq '.issues[] | select(.severity == "breaking")'
+```
+
+This lets the agent read only the breaking issues and decide what to fix next, without parsing human-readable text.
+
+#### CI integration
+
+Add a quality gate to your CI pipeline with the `--strict` flag, which treats warnings as errors:
+
+```yaml
+# .github/workflows/check-notebooks.yml
+name: Check Notebooks
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v1
+      - run: uv run marimo check --strict .
+```
+
+#### Hands-on: lint the workshop notebook
+
+Run `marimo check` on the notebook you have been editing in this module:
+
+```bash
+marimo check Module_4/module_4.py
+```
+
+If there are issues, try:
+
+```bash
+marimo check --fix Module_4/module_4.py
+```
+
+Then open the notebook and verify it runs cleanly end to end.
+
+---
+
 Module 5 brings everything full circle: once your interactive, AI-assisted, reproducible notebook is working, how do you turn it into reusable systems that others can depend on?
 
 #### What's Next

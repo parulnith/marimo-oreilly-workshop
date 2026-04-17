@@ -1,12 +1,11 @@
 ## Module 1: Why Interactive Programming Environments Matter for AI and ML
 
-In this module we'll see where notebooks do well, to seeing where they break, to experiencing a fundamentally better alternative, to getting hands-on with it yourself.
 
 ### 1.1 Interactive Environments in the Modern AI/ML Stack
 
 #### Why Notebooks Matter
 
-Interactive programming environments are a fundamental part of today's AI and ML development stack. They aren't a nice-to-have — they're where the actual work happens.
+Interactive programming environments are a fundamental part of today's AI and ML development stack.whether you deny or accept this, a lot of research work happens here, I mean look at all the workshop repo on Github. 
 
 AI development isn't like building a web app. You don't write code, compile, and ship. You explore, experiment, and iterate — constantly moving between code, data, and results. This tight loop is the core rhythm of ML work:
 
@@ -27,13 +26,9 @@ This write-see-adjust cycle shows up everywhere in AI/ML work:
 
 In every case, you need to see intermediate results to decide what to do next.
 
-#### The People Who Built AI Used Notebooks
 
-This isn't a niche workflow for beginners. Alec Radford — the first author of the original GPT paper and the researcher behind GPT-2, CLIP, DALL-E, and Whisper — did much of his groundbreaking work inside Jupyter Notebooks. No PhD. No fancy IDE. Just a notebook and a big idea. Sam Altman called him an "Einstein-level genius."
+### Show me the Code
 
-The most consequential AI breakthroughs of the last decade were prototyped in notebooks. There's a reason for that: notebooks match how AI research actually works.
-
-#### Hands-On: A Working Notebook
 
 To experience this firsthand, we build a simple compound interest calculator in a Jupyter notebook. It's not an ML problem — intentionally. The point is the *workflow*, not the domain.
 
@@ -110,20 +105,7 @@ You delete a cell, but the variable it defined is still alive in memory. Other c
 Delete the `compound_interest()` function cell from the notebook. The cells that call it still work — the function is a ghost in memory. Restart the kernel and run all, and it crashes: `NameError: name 'compound_interest' is not defined`. The notebook that looked perfect was broken the entire time.
 
 
-#### This Isn't a Minor Issue
 
-A landmark study by Pimentel et al. (2019) examined 1,159,166 unique Jupyter notebooks collected from 264,023 GitHub repositories. The findings were stark:
-
-- **Only 24.11%** of notebooks executed without errors
-- **Only 4.03%** produced the same results as their stored outputs
-- **36%** of notebooks had cells executed out of order
-- **77%** had skips in execution counters, indicating hidden state
-
-These aren't contrived edge cases. Out-of-order execution and hidden state are the norm, not the exception. The better the notebook experience feels, the more dangerous these issues become — because you trust the tool.
-
-> **Source:** Pimentel, J.F., Murta, L., Braganholo, V., and Freire, J. "A Large-scale Study about Quality and Reproducibility of Jupyter Notebooks." *IEEE/ACM International Conference on Mining Software Repositories*, 2019.
-
----
 
 ### 1.3 Why Reactive Execution Is a Better Alternative
 
@@ -525,6 +507,8 @@ This makes marimo notebooks self-documenting — code, results, and explanation 
 #### Constraints
 
 To keep the dependency graph clean, marimo enforces two rules:
+
+add gloabl only once
 
 1. **No duplicate variable names across cells.** For example, if one cell says:
 

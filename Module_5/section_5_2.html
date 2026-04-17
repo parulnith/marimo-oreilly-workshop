@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publishing Interactive Apps | Marimo Workshop</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --sidebar-bg: #fafafa;
+      --sidebar-border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #7c3aed;
+      --accent-light: #f5f3ff;
+      --accent-border: #ddd6fe;
+      --code-bg: #1c1917;
+      --code-text: #e7e5e4;
+      --border: #e5e7eb;
+      --nav-active-bg: #f5f3ff;
+      --nav-active-text: #7c3aed;
+      --example-bg: #f9fafb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      background: white;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar .logo {
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .topbar .logo-icon {
+      width: 22px; height: 22px;
+      background: var(--accent);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 0.7rem; font-weight: 800;
+    }
+
+    .topbar-links {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .topbar-links a { text-decoration: none; color: inherit; }
+    .topbar-links a:hover { color: var(--text); }
+
+    /* ── Shell ── */
+    .shell {
+      display: flex;
+      margin-top: 52px;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* ── Left sidebar ── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      padding: 1.5rem 0;
+      position: fixed;
+      top: 52px;
+      height: calc(100vh - 52px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      padding: 0 1rem 1rem;
+    }
+
+    .sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 0 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.38rem 0.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+
+    .nav-item:hover { background: #f3f4f6; color: var(--text); }
+
+    .nav-item.active {
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      font-weight: 500;
+    }
+
+    .nav-item .num {
+      width: 18px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .nav-item.active .num { color: var(--accent); }
+
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.75rem 1rem;
+    }
+
+    /* ── Main content ── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 3rem 4rem 6rem;
+      max-width: 860px;
+    }
+
+    .breadcrumb {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb span { color: var(--accent); }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 2rem 0 0.6rem;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.4rem;
+      color: var(--text);
+    }
+
+    p { margin-bottom: 1rem; color: #374151; }
+
+    ul, ol {
+      margin: 0.5rem 0 1rem 1.25rem;
+      color: #374151;
+    }
+
+    li { margin-bottom: 0.3rem; }
+
+    code {
+      font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+      background: #f3f4f6;
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.84rem;
+      font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+      margin: 0.75rem 0 1rem;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.1);
+      color: #a8a29e;
+      border: none;
+      border-radius: 4px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── Callout ── */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.88rem;
+      color: #4c1d95;
+    }
+
+    .callout.warn {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #78350f;
+    }
+
+    /* ── Example box ── */
+    .example-box {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .example-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1rem;
+      background: var(--example-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .example-header .tag {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .tag-step { background: #dbeafe; color: #1e40af; }
+    .tag-tip  { background: #dcfce7; color: #166534; }
+    .tag-warn { background: #fef3c7; color: #92400e; }
+
+    .example-body {
+      padding: 1rem 1.25rem;
+      font-size: 0.88rem;
+    }
+
+    /* expandable "See response" */
+    .see-response {
+      margin-top: 0.75rem;
+    }
+
+    .see-response-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: 1px solid var(--accent-border);
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .see-response-btn:hover { background: var(--accent-light); }
+
+    .see-response-btn .arrow { transition: transform 0.2s; display: inline-block; }
+    .see-response-btn.open .arrow { transform: rotate(90deg); }
+
+    .response-panel {
+      display: none;
+      margin-top: 0.75rem;
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      color: #4c1d95;
+    }
+
+    .response-panel.open { display: block; }
+
+    /* ── Live app embed ── */
+    .embed-section {
+      margin: 2rem 0;
+    }
+
+    .embed-section h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .live-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 1.6s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+
+    .browser-chrome {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.85rem;
+      background: #f3f4f6;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .browser-dots { display: flex; gap: 5px; }
+    .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ef4444; }
+    .dot-y { background: #f59e0b; }
+    .dot-g { background: #22c55e; }
+
+    .browser-url {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    .browser-url .protocol { color: #22c55e; }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 540px;
+      border: none;
+    }
+
+    .offline-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      height: 300px;
+      background: #fafafa;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .offline-state .icon { font-size: 2.25rem; }
+    .offline-state strong { color: var(--text); }
+
+    /* ── Quiz ── */
+    .quiz {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      background: white;
+    }
+
+    .quiz p.question {
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+      color: var(--text);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .quiz-option:hover { background: #f9fafb; }
+
+    .quiz-option input[type="radio"] {
+      margin-top: 2px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .quiz-option.correct {
+      background: #f0fdf4;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .quiz-option.wrong {
+      background: #fff1f2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .quiz-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: #6d28d9; }
+
+    .btn-ghost {
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+    .btn-ghost:hover { background: #e5e7eb; color: var(--text); }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 7px;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.right { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+    .quiz-feedback.wrong-fb { background: #fff1f2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* ── Completed banner ── */
+    .completed {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+      text-align: center;
+    }
+
+    .completed p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+
+    .completed .next-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      padding: 0.65rem 1.25rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .completed .next-btn:hover { background: #6d28d9; }
+
+    /* ── Bottom bar ── */
+    .bottombar {
+      position: fixed;
+      bottom: 0;
+      left: 260px;
+      right: 0;
+      height: 44px;
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      z-index: 99;
+    }
+
+    .bottombar .ask-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background 0.15s;
+    }
+
+    .bottombar .ask-btn:hover { background: #f9fafb; }
+
+    .bottombar .context {
+      font-family: monospace;
+      font-size: 0.74rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<nav class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-icon">M</div>
+    Marimo Workshop
+  </a>
+  <div class="topbar-links">
+    <a href="#">Docs</a>
+    <a href="#">Notebooks</a>
+    <a href="#">Help</a>
+  </div>
+</nav>
+
+<div class="shell">
+
+  <!-- Left sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Marimo Foundations</div>
+      <a class="nav-item" href="#"><span class="num">1</span> Reactive notebooks</a>
+      <a class="nav-item" href="#"><span class="num">2</span> UI elements</a>
+      <a class="nav-item" href="#"><span class="num">3</span> Data &amp; visualization</a>
+      <a class="nav-item" href="#"><span class="num">4</span> SQL &amp; DuckDB</a>
+    </div>
+
+    <hr class="sidebar-divider" />
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Module 5 · Reusable Systems</div>
+      <a class="nav-item" href="#"><span class="num">1</span> Executable scripts</a>
+      <a class="nav-item active" href="#"><span class="num">2</span> Publishing apps</a>
+      <a class="nav-item" href="#"><span class="num">3</span> Artifacts &amp; export</a>
+      <a class="nav-item" href="#"><span class="num">4</span> Importable modules</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="breadcrumb">Module 5 · <span>Publishing flexible, interactive data apps</span></div>
+    <h1>Publishing Interactive Apps</h1>
+
+    <p>
+      <strong>Apps</strong> turn your analysis into a tool for others. The notebook where you built a classifier becomes a dashboard your team can use — they see results, charts, and comparisons without ever seeing the prompt engineering or JSON parsing underneath.
+    </p>
+
+    <h2>What does <code>marimo run</code> do?</h2>
+
+    <p>
+      Running <code>marimo run</code> instead of <code>marimo edit</code> hides all code cells and serves only the outputs and UI elements. Your notebook becomes a clean web app — no visible Python, no cell borders, just the interface you designed.
+    </p>
+
+    <div class="example-box">
+      <div class="example-header">
+        <span>App example: edit vs run mode</span>
+        <span class="tag tag-tip">tip</span>
+      </div>
+      <div class="example-body">
+        <p style="margin:0 0 0.5rem;">The same <code>module_5.py</code> file behaves differently depending on how you invoke it:</p>
+        <ul style="margin:0 0 0.75rem 1.25rem;font-size:0.88rem;">
+          <li><code>marimo edit module_5.py</code> — full notebook, all cells visible, code editable</li>
+          <li><code>marimo run module_5.py</code> — outputs and UI only, code hidden, read-only</li>
+        </ul>
+        <p style="margin:0;font-size:0.88rem;">The reactive engine is the same. Changing the model dropdown still re-classifies all reviews in real time.</p>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
+    <h2>Step 1 — Launch the app</h2>
+
+    <p>Run this from the <code>Module_5</code> folder. Marimo starts a local server and opens the app in your browser.</p>
+
+    <pre><button class="copy-btn" onclick="cp(this)">copy</button>marimo run module_5.py</pre>
+
+    <p>
+      You will see the model selector, classify button, results table, summary stats, and accuracy charts — all working reactively. The prompt and JSON parsing are invisible.
+    </p>
+
+    <div class="example-box">
+      <div class="example-header">
+        <span>What to try in the app</span>
+        <span class="tag tag-step">hands-on</span>
+      </div>
+      <div class="example-body">
+        <ol style="font-size:0.88rem;margin:0 0 0 1.25rem;">
+          <li>Change <strong>Model A</strong> to <code>llama3.2:1b</code> and re-run classification</li>
+          <li>Edit a review in the text area and see how the labels update</li>
+          <li>Mark a few classifications correct/incorrect — watch the accuracy bar update live</li>
+          <li>Click the layout icon (bottom-right) → <strong>Slides</strong> for a presentation view</li>
+        </ol>
+        <div class="see-response">
+          <button class="see-response-btn" onclick="toggleResponse(this)">
+            <span class="arrow">▶</span> See what slides mode looks like
+          </button>
+          <div class="response-panel">
+            Slides mode re-flows your notebook into a deck — each section becomes its own slide. The model selector appears on slide 1, results table on slide 2, accuracy dashboard on slide 3. Useful for presenting your analysis step by step without scrolling.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <h2>Step 2 — Share on your local network</h2>
+
+    <p>Bind to all interfaces so teammates on the same WiFi can open the app without installing Python or marimo.</p>
+
+    <pre><button class="copy-btn" onclick="cp(this)">copy</button>marimo run module_5.py --host 0.0.0.0 --port 8080</pre>
+
+    <p>Find your machine's IP address:</p>
+
+    <pre><button class="copy-btn" onclick="cp(this)">copy</button>ipconfig getifaddr en0</pre>
+
+    <p>Your teammate opens <code>http://&lt;your-ip&gt;:8080</code> — full interactive classifier, nothing to install on their end.</p>
+
+    <div class="callout warn">
+      <strong>Before you start:</strong> Ollama must be running — <code>ollama serve</code> — or classifications will fail with a connection error.
+    </div>
+
+    <div class="callout">
+      <strong>Slides layout:</strong> In the app, open the layout switcher (bottom-right corner) and choose <strong>Slides</strong> to step through your results one section at a time — useful for presenting findings to a team.
+    </div>
+
+    <!-- Live embed -->
+    <div class="embed-section">
+      <h2><div class="live-dot"></div> Live app</h2>
+
+      <p style="margin-bottom:0.9rem;font-size:0.88rem;color:var(--muted);">
+        The app below is served by <code>marimo run module_5.py</code> running locally. Start it, then this embed comes to life.
+      </p>
+
+      <div class="browser-chrome">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <div class="browser-url">
+            <span class="protocol">http://</span>localhost:2718
+          </div>
+        </div>
+
+        <!-- iframe loads the local marimo server -->
+        <iframe
+          id="marimo-frame"
+          src="http://localhost:2718"
+          title="Module 5 live app"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+        ></iframe>
+
+        <!-- shown if server isn't running -->
+        <div class="offline-state" id="offline-state" style="display:none;">
+          <div class="icon">🚀</div>
+          <strong>App not running yet</strong>
+          <p>Start it from your terminal:</p>
+          <pre style="width:auto;display:inline-block;padding:0.45rem 1rem;font-size:0.83rem;margin:0.25rem 0;">marimo run module_5.py</pre>
+          <p style="margin-top:0.5rem;font-size:0.83rem;">
+            Then <a href="javascript:location.reload()" style="color:var(--accent);text-decoration:none;font-weight:500;">refresh this page</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quiz -->
+    <h2>Check your understanding</h2>
+
+    <div class="quiz" id="quiz">
+      <p class="question">What is the key difference between <code>marimo edit</code> and <code>marimo run</code>?</p>
+
+      <div class="quiz-options" id="quiz-options">
+        <label class="quiz-option">
+          <input type="radio" name="q" value="a" />
+          <span><code>marimo run</code> uses a faster execution engine.</span>
+        </label>
+        <label class="quiz-option">
+          <input type="radio" name="q" value="b" />
+          <span><code>marimo run</code> hides code cells and serves only outputs and UI elements, making your notebook a clean app.</span>
+        </label>
+        <label class="quiz-option">
+          <input type="radio" name="q" value="c" />
+          <span><code>marimo run</code> exports the notebook to a static HTML file.</span>
+        </label>
+        <label class="quiz-option">
+          <input type="radio" name="q" value="d" />
+          <span><code>marimo run</code> requires you to convert the file first.</span>
+        </label>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn btn-primary" onclick="checkQuiz()">Check</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">Reset</button>
+      </div>
+
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+    </div>
+
+    <!-- Embedded notebook -->
+    <h2>Try it — notebook embedded in this page</h2>
+
+    <p>
+      The notebook below is the same classifier rendered as a <strong>WASM app</strong> — it runs entirely in your browser, no server needed. It uses pre-classified mock data so you can explore the UI interactively right here.
+    </p>
+
+    <div class="callout" style="margin-bottom:1rem;">
+      <strong>How to generate this embed yourself:</strong>
+      <pre style="margin:0.5rem 0 0;padding:0.5rem 0.85rem;font-size:0.82rem;">marimo export html-wasm demo_5_2.py -o wasm_demo --mode run</pre>
+      Then serve the folder and embed it: <code>python -m http.server 8081</code>
+    </div>
+
+    <div class="browser-chrome" style="margin:0.75rem 0 2rem;">
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+        </div>
+        <div class="browser-url">
+          <span class="protocol">wasm://</span>demo_5_2 · runs in browser
+        </div>
+      </div>
+      <!-- Points to the WASM export output folder generated by:
+           marimo export html-wasm demo_5_2.py -o wasm_demo - -mode run   -->
+      <iframe
+        id="wasm-frame"
+        src="wasm_demo/index.html"
+        title="WASM demo notebook"
+        style="height:580px;"
+      ></iframe>
+      <div class="offline-state" id="wasm-offline" style="display:none;">
+        <div class="icon">📦</div>
+        <strong>WASM export not built yet</strong>
+        <p>Generate it once from the <code>Module_5</code> folder:</p>
+        <pre style="display:inline-block;padding:0.45rem 1rem;font-size:0.82rem;margin:0.25rem 0;">marimo export html-wasm demo_5_2.py -o wasm_demo --mode run</pre>
+        <p style="margin-top:0.5rem;font-size:0.83rem;">
+          Then <a href="javascript:location.reload()" style="color:var(--accent);text-decoration:none;font-weight:500;">refresh this page</a> — the interactive notebook appears above.
+        </p>
+      </div>
+    </div>
+
+    <!-- Completed -->
+    <div class="completed">
+      <p>You've completed this chapter</p>
+      <a class="next-btn" href="#">Keep learning → 5.3 Artifacts &amp; Export</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottombar">
+  <button class="ask-btn">
+    💬 Ask questions about the docs
+  </button>
+  <span class="context">Context: 0 / 200k (0%)</span>
+</div>
+
+<script>
+  // Copy buttons
+  function cp(btn) {
+    const text = btn.parentElement.innerText.replace(/^copy\n?/, "").trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = "copied!";
+      setTimeout(() => btn.textContent = "copy", 1600);
+    });
+  }
+
+  // Toggle "See response" panels
+  function toggleResponse(btn) {
+    const panel = btn.nextElementSibling;
+    const open = panel.classList.toggle("open");
+    btn.classList.toggle("open", open);
+    btn.querySelector(".arrow").textContent = open ? "▼" : "▶";
+  }
+
+  // Quiz logic
+  const correct = "b";
+
+  function checkQuiz() {
+    const selected = document.querySelector('input[name="q"]:checked');
+    if (!selected) return;
+    const options = document.querySelectorAll(".quiz-option");
+    const fb = document.getElementById("quiz-feedback");
+    options.forEach(opt => {
+      const val = opt.querySelector("input").value;
+      opt.classList.remove("correct", "wrong");
+      if (val === correct) opt.classList.add("correct");
+      else if (val === selected.value && val !== correct) opt.classList.add("wrong");
+    });
+    fb.classList.add("show");
+    if (selected.value === correct) {
+      fb.className = "quiz-feedback show right";
+      fb.textContent = "✓ Correct! marimo run hides all code and serves only the outputs and UI elements as a clean app.";
+    } else {
+      fb.className = "quiz-feedback show wrong-fb";
+      fb.textContent = "Not quite — marimo run doesn't change the engine or export to HTML. It simply hides code cells and serves the app.";
+    }
+    document.querySelectorAll('input[name="q"]').forEach(i => i.disabled = true);
+  }
+
+  function resetQuiz() {
+    document.querySelectorAll(".quiz-option").forEach(o => o.classList.remove("correct", "wrong"));
+    document.querySelectorAll('input[name="q"]').forEach(i => { i.checked = false; i.disabled = false; });
+    const fb = document.getElementById("quiz-feedback");
+    fb.classList.remove("show", "right", "wrong-fb");
+    fb.textContent = "";
+  }
+
+  // Live server iframe detection
+  const frame = document.getElementById("marimo-frame");
+  const offline = document.getElementById("offline-state");
+
+  setTimeout(() => {
+    fetch("http://localhost:2718", { mode: "no-cors" })
+      .catch(() => {
+        frame.style.display = "none";
+        offline.style.display = "flex";
+      });
+  }, 2500);
+
+  // WASM iframe detection
+  const wasmFrame = document.getElementById("wasm-frame");
+  const wasmOffline = document.getElementById("wasm-offline");
+
+  wasmFrame.addEventListener("error", () => {
+    wasmFrame.style.display = "none";
+    wasmOffline.style.display = "flex";
+  });
+
+  // If the WASM src 404s, the iframe load event still fires but shows an error page.
+  // We also try fetching it to confirm it exists.
+  fetch("wasm_demo/index.html")
+    .then(r => { if (!r.ok) throw new Error(); })
+    .catch(() => {
+      wasmFrame.style.display = "none";
+      wasmOffline.style.display = "flex";
+    });
+</script>
+
+</body>
+</html>

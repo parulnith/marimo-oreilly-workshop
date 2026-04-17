@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "marimo",
+#     "marimo>=0.22.4",
 #     "matplotlib==3.10.8",
 #     "pandas==3.0.1",
 # ]
@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.20.4"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
@@ -47,7 +47,7 @@ def compound_interest(principal, rate, years):
 def _():
     principal = 10000
     rate = 0.07
-    years = 20
+    years = 50
 
     growth = compound_interest(principal, rate, years)
     return growth, principal, rate, years
@@ -55,23 +55,21 @@ def _():
 
 @app.cell(hide_code=True)
 def _(growth, mo, rate, years):
-    mo.md(
-        f"""
+    mo.md(f"""
     After **{years} years** at **{rate:.0%}**, the account grows to
     **${growth[-1]:,.2f}**.
-    """
-    )
+    """)
     return
 
 
 @app.cell
 def _(growth, plt, years):
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     ax.plot(range(years + 1), growth, marker="o")
     ax.set_xlabel("Year")
     ax.set_ylabel("Balance ($)")
     ax.set_title(f"Compound Interest Growth ({years} years)")
-    fig
+    plt.gca()
     return
 
 
