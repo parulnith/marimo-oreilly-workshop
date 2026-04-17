@@ -15,11 +15,11 @@ def _():
 @app.cell
 def _(np, plt):
     x = np.linspace(-3, 3, 200)
-    y = x**2
+    y = x**3
 
     fig, ax = plt.subplots()
     ax.plot(x, y)
-    ax.set_title("y = x^2")
+    ax.set_title("y = x^3")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     fig
