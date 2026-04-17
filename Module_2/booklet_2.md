@@ -83,11 +83,11 @@ Reproducibility is not only about execution. It is also about making experiments
 
 #### The file format problem
 
-Jupyter notebooks are stored as JSON. Even a small code change can produce a large diff because execution counts, output blobs, and metadata are stored alongside the code.
+Jupyter notebooks are stored as JSON. That means a small code edit often does not look small in version control. Execution counts, outputs, and metadata are saved alongside the code, so a one-line change can produce a noisy diff.
 
-That makes review harder. It becomes difficult to see what actually changed and what is just notebook noise.
+That makes review harder because the real change is mixed with notebook structure.
 
-A marimo notebook is a plain `.py` file. If one cell changes, the diff shows that code change directly. That makes pull requests easier to review, merge conflicts easier to resolve, and version history easier to understand.
+A marimo notebook is a plain Python file. Small changes to notebook code are guaranteed to make small, localized changes to the notebook file, yielding easy-to-read Git diffs. For example, even a one-character change, such as modifying `for` to `version`, remains visible as a local code edit rather than being buried in notebook structure.
 
 > 💡 **Try it — `Module_2/2.2.py`**
 >
@@ -103,6 +103,8 @@ When experimental work is easy to review, reproducibility gets stronger. Clear d
 - Did the result change because of the code, or because of the environment?
 
 Plain-text notebooks help because the important changes are visible. That makes collaboration more reliable and reduces the chance that a meaningful experimental change is hidden inside formatting noise.
+
+This is the core advantage of treating notebooks as Python rather than JSON: the file stays closer to the logic you actually want to review.
 
 This matters for trustworthy AI because reproducibility is not only technical. It is also social. Other people need to inspect what changed, understand why it changed, and verify that the result still deserves confidence.
 
