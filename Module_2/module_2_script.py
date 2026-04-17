@@ -7,7 +7,7 @@ app = marimo.App()
 @app.cell
 def _():
     x = 10
-    y = 30
+    y = 40
     print("Sum =", x + y)
     return
 
