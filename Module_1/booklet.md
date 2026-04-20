@@ -376,6 +376,8 @@ If you want to share the current view of a notebook as a static artifact, marimo
 
 Every marimo notebook is modeled as a **directed acyclic graph (DAG)** on cells. marimo reads your code using static analysis — without running it — and determines what each cell defines and what it references. From there, it builds a dependency graph.
 
+Those dependencies come from variable references across cells. Because marimo can see which global names a cell defines and which names it depends on, it can infer the notebook's internal execution order before running it. That means when a notebook is shared or distributed, its cells still run in a consistent logical order instead of depending on whatever order a person happened to click them.
+
 When you run a cell:
 
 1. marimo checks what variables that cell defines
@@ -383,6 +385,8 @@ When you run a cell:
 3. It re-runs those cells automatically — or, in **lazy mode**, marks them as stale (shown in yellow) and waits for you to run them manually
 
 Lazy mode is useful when cells are expensive to run — a model training step, a large data load, a slow API call. Rather than re-running everything on every change, marimo marks affected cells as stale and lets you decide when to update them. Toggle it in the notebook's runtime settings.
+
+This is also why marimo can let you edit or run individual cells while still keeping the notebook coherent. The dependency graph keeps track of what is upstream, what is downstream, and what needs to be refreshed.
 
 When you delete a cell:
 
@@ -588,4 +592,3 @@ This makes it easy to share results with stakeholders who don't need to run the 
 Quiz
 
 ---
-

@@ -1,18 +1,21 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "marimo",
+#     "altair==6.0.0",
+#     "marimo>=0.23.1",
 #     "matplotlib==3.10.7",
 #     "numpy",
 #     "pandas==2.3.3",
 #     "scikit-learn==1.8.0",
 #     "tabicl",
+#     "vegafusion==2.0.3",
+#     "vl-convert-python==1.9.0.post1",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.22.0"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
@@ -21,15 +24,24 @@ def _(mo):
     mo.md("""
     # Interactive ML Workflow
 
-    Interactive computation as a unified system means that data, models,
-    visualizations, and user input are all part of the same live graph. In
-    marimo, widgets are variables, tables can become inputs, model outputs can
-    feed new analysis, and visual changes propagate automatically through the
-    notebook.
+    Here, we will see **data, controls, models, and plots** behave as one live
+    system. Widgets are variables, tables become inputs, model outputs feed new
+    analysis, and visual changes propagate automatically through the notebook.
 
-    This notebook presents that idea as one end-to-end workflow: start with the
-    data, move into visual exploration, then fit models and use their outputs to
-    guide the next step of analysis.
+    Concretely, this notebook walks through:
+
+    - **Data** — raw dataframe + `mo.ui.data_editor` for editable samples
+    - **Visualization** — `mo.ui.data_explorer` and `mo.ui.dataframe` for
+      chart-first and transform-first exploration
+    - **Controls** — `mo.ui.multiselect` and `mo.ui.slider` to drive feature
+      selection and sampling
+    - **Models** — TabICL and Random Forest fit on the same live inputs
+    - **Error analysis** — `mo.ui.table` that sends selected rows back into
+      Python, closing the loop from model outputs to data
+
+    Start with the data, move into visual exploration, then fit models and use
+    their outputs to guide the next step of analysis — all without rerunning
+    cells.
     """)
     return
 
@@ -89,14 +101,28 @@ def _(mo):
     mo.md("""
     ### Raw dataframe
 
-    The plain dataframe output gives you a baseline view of the dataset.
+    The dataframe output gives you a baseline view of the dataset. marimo lets you page through, search, sort, and filter dataframes, making it extremely easy to get a feel for your data.
     """)
     return
 
 
 @app.cell
 def _(df):
-    df
+    df[:1000]
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    To opt out of the rich dataframe viewer, use mo.plain:
+    """)
+    return
+
+
+@app.cell
+def _(df, mo):
+    mo.plain(df.head())
     return
 
 
@@ -114,23 +140,33 @@ def _(mo):
 
 @app.cell
 def _(df, mo):
-    editable_sample = mo.ui.data_editor(
-        df[["age", "education-num", "hours-per-week", "capital-gain"]].head(8),
-        label="Optional: edit a small sample to test what-if scenarios",
-    )
-    editable_sample
+    data_editor = mo.ui.data_editor(df)
+    data_editor
+    return (data_editor,)
+
+
+@app.cell
+def _(df, mo):
+    mo.ui.data_editor(df,editable_columns=['age','education'])
     return
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ### Data Explorer
+@app.cell
+def _(data_editor):
+    data_editor.value
+    return
 
-    `mo.ui.data_explorer(df)` is chart-first. Use it when you want to explore
-    distributions and relationships visually before deciding which features
-    are worth modelling.
-    """)
+
+@app.cell
+def _(df, mo):
+    editor = mo.ui.table(df)
+    editor
+    return (editor,)
+
+
+@app.cell
+def _(editor):
+    editor.value
     return
 
 
@@ -142,6 +178,18 @@ def _(mo):
     After looking at the raw table and an editable sample, move into marimo's
     visual exploration tools. These help you go from rows and columns to
     patterns, distributions, and relationships.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ### Data Explorer
+
+    `mo.ui.data_explorer(df)` is chart-first. Use it when you want to explore
+    distributions and relationships visually before deciding which features
+    are worth modelling.
     """)
     return
 
@@ -168,8 +216,7 @@ def _(mo):
 
 @app.cell
 def _(df, mo):
-    explorer = mo.ui.dataframe(df)
-    explorer
+    mo.ui.dataframe(df)
     return
 
 
@@ -259,7 +306,7 @@ def _(selected_features):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     X_test,
     X_train,
@@ -481,8 +528,6 @@ def _(
     threshold_slider,
     y_test,
 ):
-    import pandas as pd
-
     threshold = threshold_slider.value
     active_proba = tabicl_proba if model_source.value == "TabICL" else rf_proba
     y_pred = (active_proba[:, 1] >= threshold).astype(int)
@@ -521,7 +566,7 @@ def _(
         | False negatives | `{len(fn):,}` |
         """
     )
-    return display_errors, pd, results_df
+    return display_errors, results_df
 
 
 @app.cell
@@ -582,26 +627,6 @@ def _(error_table, mo, pd, results_df):
             ),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    `mo.ui.table(...)` is different from the earlier dataframe widgets — it
-    returns the selected rows back to Python as a dataframe. Clicking rows in
-    the table feeds the comparison summary above automatically.
-
-    ---
-
-    ### Things to try
-
-    - Lower the sampled row count and compare the AUC again.
-    - Remove `capital-gain` from the feature selector and watch ROC AUC change.
-    - Lower the threshold to 0.3 and see how false positives increase.
-    - Filter to false negatives only and compare their feature means to the
-      full test set.
-    """)
     return
 
 

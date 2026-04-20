@@ -83,15 +83,38 @@ Reproducibility is not only about execution. It is also about making experiments
 
 #### The file format problem
 
-Jupyter notebooks are stored as JSON. That means a small code edit often does not look small in version control. Execution counts, outputs, and metadata are saved alongside the code, so a one-line change can produce a noisy diff.
+Jupyter notebooks are stored as JSON files that contain both code and outputs. That means a small code edit often does not look small in version control. Execution counts, outputs, and metadata are saved alongside the code, so a one-line change can produce a noisy diff.
 
 That makes review harder because the real change is mixed with notebook structure.
 
-A marimo notebook is a plain Python file. Small changes to notebook code are guaranteed to make small, localized changes to the notebook file, yielding easy-to-read Git diffs. For example, even a one-character change, such as modifying `for` to `version`, remains visible as a local code edit rather than being buried in notebook structure.
+A marimo notebook is a plain Python file. Each notebook cell is saved as Python code in the file, and marimo does not save outputs in the notebook file. Small changes to notebook code therefore create small, localized changes in the file, which makes Git diffs much easier to read. The diff corresponds closely to the code change itself, with the file changing only where the code changed.
+
+By contrast, the equivalent Jupyter notebook diff can become dramatically larger because `.ipynb` files store outputs and notebook state alongside the code, including base64-encoded output blobs. In the marimo example, the equivalent Jupyter diff grows to tens of thousands of characters and includes many changes unrelated to the original one-character edit.
+
+These diffs are not only difficult for an individual to read, they also make merge conflicts much harder to resolve in collaborative work.
 
 > 💡 **Try it — `Module_2/2.2.py`**
 >
 > Run the notebook. It shows a live one-line diff for a small code change, then the equivalent Jupyter diff for the same change.
+>
+> You can also inspect the diff in the terminal:
+>
+> ```bash
+> git diff Module_2/2.2.py
+> ```
+>
+> If Git opens a pager, press `q` to exit. If you end up in Vim instead, use `:wq` to save and quit or `:q!` to quit without saving.
+>
+> A simple live demo is:
+>
+> ```python
+> a = 10
+> b = 20
+> c = a + b
+> c
+> ```
+>
+> Show this first in the notebook, then open the saved `.py` file and point out that each cell is stored as Python code and the output is not saved in the file. Then change `a = 10` to `a = 15` and show the Git diff. The file change stays small and readable.
 
 #### Reviewability supports reproducibility
 
@@ -121,5 +144,85 @@ Reproducibility is the baseline that makes trustworthy AI possible. It is not on
 
 In this module, the key takeaway is that trustworthy AI depends on more than models and metrics. It also depends on controlled environments, reviewable changes, and workflows that remain stable over time.
 
+### 3 Takeaways to Remember
+
+1. **Re-running is not the same as reproducibility.**  
+   If the same code gives different results on another machine or at another time, the workflow is not yet trustworthy.
+
+2. **The environment is part of the result.**  
+   Library versions, Python versions, and transitive dependencies all affect behavior, so reproducibility requires defining and carrying the environment with the notebook.
+
+3. **Readable diffs make experiments easier to trust.**  
+   When changes are easy to inspect in Git, it is easier to review experiments, understand what changed, and resolve collaboration issues.
+
+### Code to Remember
+
+```bash
+marimo edit --sandbox Module_2/2.2.py
+```
+
+Use this to show the strongest reproducibility setup: an isolated environment plus notebook-carried dependencies.
+
+```bash
+git diff Module_2/2.2.py
+```
+
+Use this to show that a plain Python notebook produces readable diffs.
+
+```python
+# dependencies live with the notebook
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "marimo",
+#     "pandas==2.3.3",
+#     "scikit-learn==1.8.0",
+# ]
+# ///
+```
+
+Use this as the visual reminder that the environment is part of the work.
+
 **Script cue:**  
-If a result cannot be reproduced clearly and consistently, it should not be treated as fully trustworthy.
+Trustworthy AI starts with reproducible results. Reproducibility depends on the environment, not just the code. If changes are easy to review, results are easier to trust.
+
+---
+
+## Quiz
+
+### 1. Which statement about marimo sandboxing is most accurate?
+
+- A. Sandboxing is enabled automatically for every notebook
+- B. Sandboxing uses an isolated environment and must be enabled with `--sandbox`
+- C. Sandboxing only changes how Git displays diffs
+- D. Sandboxing removes the need to track dependencies
+
+**Answer:** B. Sandboxing uses an isolated environment and must be enabled with `--sandbox`
+
+**Explanation:** Sandboxing is opt-in. It creates an isolated environment so notebook dependencies do not interfere with the rest of the system or project setup.
+
+---
+
+### 2. A one-line change is made in both a marimo notebook and an equivalent `.ipynb` notebook. The `.ipynb` diff is much larger. What is the best explanation?
+
+- A. Git handles notebook files incorrectly
+- B. The marimo notebook hides parts of the diff automatically
+- C. The `.ipynb` file stores code together with notebook structure, execution state, and output data
+- D. The `.ipynb` change must be more important than the marimo change
+
+**Answer:** C. The `.ipynb` file stores code together with notebook structure, execution state, and output data
+
+**Explanation:** Jupyter notebook diffs often include metadata and saved outputs, so the visible diff can be much larger than the actual code change.
+
+---
+
+### 3. Why are code changes usually easier to identify in a marimo notebook than in a `.ipynb` notebook?
+
+- A. marimo notebooks do not allow outputs or markdown
+- B. marimo notebooks are Python files and do not save outputs in the notebook file
+- C. marimo notebooks automatically remove all metadata from Git
+- D. marimo notebooks always change only one cell at a time
+
+**Answer:** B. marimo notebooks are Python files and do not save outputs in the notebook file
+
+**Explanation:** When outputs are not stored inside the notebook file, diffs stay closer to the actual code change instead of mixing code with notebook state and rendered results.
