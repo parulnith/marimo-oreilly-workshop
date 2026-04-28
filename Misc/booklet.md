@@ -119,7 +119,7 @@ This is the idea behind **reactive execution**. Instead of treating a notebook a
 
 We rebuild the same compound interest calculator — the exact same logic — in a reactive notebook. But we do it in two stages.
 
-First, in `marimo-reactive-workflow.py`, we keep the inputs as plain Python variables:
+First, in `1_2_marimo_reactive_workflow.py`, we keep the inputs as plain Python variables:
 
 ```python
 principal = 1000
@@ -265,10 +265,10 @@ This gives a notebook its own isolated environment.
 |---|---|
 | `marimo.new` | Opens a new notebook in molab (browser, zero install) |
 | `marimo edit` | Opens the file browser to pick or create a notebook |
-| `marimo edit Module_1/marimo-reactive-workflow.py` | Opens a specific workshop notebook in the editor |
+| `marimo edit Module_1/1_2_marimo_reactive_workflow.py` | Opens a specific workshop notebook in the editor |
 | `marimo edit --sandbox notebook.py` | Same, with isolated per-notebook dependencies |
-| `marimo run Module_1/marimo-reactive-workflow-with-sliders.py` | Runs a notebook as a read-only app (code hidden) |
-| `python Module_1/marimo-reactive-workflow.py` | Executes a notebook as a script (no UI) |
+| `marimo run Module_1/1_3_marimo_ui_elements.py` | Runs a notebook as a read-only app (code hidden) |
+| `python Module_1/1_2_marimo_reactive_workflow.py` | Executes a notebook as a script (no UI) |
 
 #### The Editor Interface
 

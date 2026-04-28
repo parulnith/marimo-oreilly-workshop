@@ -180,7 +180,7 @@ This is the idea behind **reactive execution**. Instead of treating a notebook a
 
 We rebuild the same compound interest calculator — the exact same logic — in a reactive notebook. But we do it in two stages.
 
-First, in `marimo-reactive-workflow.py`, we keep the inputs as plain Python variables:
+First, in `1_2_marimo_reactive_workflow.py`, we keep the inputs as plain Python variables:
 
 ```python
 principal = 1000
@@ -326,10 +326,10 @@ This gives a notebook its own isolated environment.
 |---|---|
 | `marimo.new` | Opens a new notebook in molab (browser, zero install) |
 | `marimo edit` | Opens the file browser to pick or create a notebook |
-| `marimo edit Module_1/marimo-reactive-workflow.py` | Opens a specific workshop notebook in the editor |
+| `marimo edit Module_1/1_2_marimo_reactive_workflow.py` | Opens a specific workshop notebook in the editor |
 | `marimo edit --sandbox notebook.py` | Same, with isolated per-notebook dependencies |
-| `marimo run Module_1/marimo-reactive-workflow-with-sliders.py` | Runs a notebook as a read-only app (code hidden) |
-| `python Module_1/marimo-reactive-workflow.py` | Executes a notebook as a script (no UI) |
+| `marimo run Module_1/1_3_marimo_ui_elements.py` | Runs a notebook as a read-only app (code hidden) |
+| `python Module_1/1_2_marimo_reactive_workflow.py` | Executes a notebook as a script (no UI) |
 
 #### The Editor Interface
 
@@ -664,7 +664,7 @@ You write code, it runs cleanly, and you send it to a colleague. They run the sa
 
 The Pimentel study measured this at scale: of 1.4 million Jupyter notebooks on GitHub, only 4% reproduced their original results when re-run. The majority of failures were not bugs — they were environmental drift. Code that was never wrong, running in a context that no longer matched the one it was written for.
 
-> 💡 **Try it — `Module_2/2.1.ipynb`**
+> 💡 **Try it — `Module_2/2_1_environment_drift.ipynb`**
 >
 > **Example 1 — scikit-learn version change.** The notebook uses `CalibratedClassifierCV(method="temperature")`. Run it in scikit-learn `1.8.0` and it works. Run it in `1.7.2` and it fails. Same code, different outcome.
 >
@@ -686,7 +686,7 @@ You write code, it runs cleanly, and you send it to a colleague. They run the sa
 
 The Pimentel study measured this at scale: of 1.4 million Jupyter notebooks on GitHub, only 4% reproduced their original results when re-run. The majority of failures were not bugs — they were environmental drift. Code that was never wrong, running in a context that no longer matched the one it was written for.
 
-> 💡 **Try it — `Module_2/2.1.ipynb`**
+> 💡 **Try it — `Module_2/2_1_environment_drift.ipynb`**
 >
 > **Example 1 — scikit-learn version change.** The notebook uses `CalibratedClassifierCV(method="temperature")`. Run it in scikit-learn `1.8.0` and it works. Run it in `1.7.2` and it fails. Same code, different outcome.
 >
@@ -716,11 +716,11 @@ If you import a missing library, marimo prompts you to install it and updates th
 
 > **Note:** this only applies to `--sandbox`. In a standard `.venv`, you still manage dependencies yourself.
 
-> 💡 **Try it — `Module_2/2.2.py`**
+> 💡 **Try it — `Module_2/2_2_sandboxed_environment.py`**
 >
 > Run the notebook and inspect the active Python, `pandas`, and `matplotlib` versions. Then reopen it in sandbox mode:
 > ```bash
-> marimo edit --sandbox Module_2/2.2.py
+> marimo edit --sandbox Module_2/2_2_sandboxed_environment.py
 > ```
 
 
@@ -730,7 +730,7 @@ Jupyter notebooks are stored as JSON. Two lines of code become dozens of lines o
 
 A marimo notebook is a plain `.py` file. Change one cell and the diff shows exactly that cell. You can review it in a pull request, use `git blame` on a specific line, and resolve merge conflicts in any text editor.
 
-> 💡 **Try it — `Module_2/2.2.py`**
+> 💡 **Try it — `Module_2/2_2_sandboxed_environment.py`**
 >
 > Run the notebook. It shows a live one-line diff for a single code change, then the equivalent Jupyter diff for the same change. The difference is immediate.
 

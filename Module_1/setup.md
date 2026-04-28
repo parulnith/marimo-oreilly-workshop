@@ -34,7 +34,7 @@ This is the easiest local option for most participants.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install marimo
+python -m pip install marimo matplotlib pandas polars
 ```
 
 ### Windows PowerShell
@@ -42,10 +42,10 @@ pip install marimo
 ```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install marimo
+py -m pip install marimo matplotlib pandas polars
 ```
 
-If that works, marimo is installed correctly.
+If that works, marimo and the packages used in Module 1 are installed correctly.
 
 Before opening the workshop files, start with the official intro notebook:
 
@@ -64,7 +64,7 @@ This is a good way to quickly see the main parts of the marimo interface before 
 ```bash
 uv venv
 source .venv/bin/activate
-uv pip install marimo
+uv pip install marimo matplotlib pandas polars
 marimo tutorial intro
 ```
 
@@ -73,7 +73,7 @@ marimo tutorial intro
 ```powershell
 uv venv
 .venv\Scripts\Activate.ps1
-uv pip install marimo
+uv pip install marimo matplotlib pandas polars
 marimo tutorial intro
 ```
 
@@ -86,7 +86,7 @@ You may also see `uvx` in the marimo docs. `uvx` is for quickly running a tool w
 Use edit mode when you want the full marimo editor:
 
 ```bash
-marimo edit Module_1/marimo-reactive-workflow.py
+marimo edit Module_1/1_2_marimo_reactive_workflow.py
 ```
 
 ### App mode
@@ -94,7 +94,7 @@ marimo edit Module_1/marimo-reactive-workflow.py
 Use app mode when you want to run a notebook with the code hidden:
 
 ```bash
-marimo run Module_1/marimo-reactive-workflow-with-sliders.py
+marimo run Module_1/1_3_marimo_ui_elements.py
 ```
 
 ### Script mode
@@ -102,7 +102,7 @@ marimo run Module_1/marimo-reactive-workflow-with-sliders.py
 Use script mode when you want to execute a notebook as normal Python:
 
 ```bash
-python Module_1/marimo-reactive-workflow.py
+python Module_1/1_2_marimo_reactive_workflow.py
 ```
 
 ### Sandbox mode
@@ -110,7 +110,7 @@ python Module_1/marimo-reactive-workflow.py
 Later in the workshop, we will use sandbox mode for reproducibility:
 
 ```bash
-marimo edit --sandbox notebook.py
+marimo edit --sandbox Module_1/1_2_marimo_reactive_workflow.py
 ```
 
 This gives a notebook its own isolated environment.

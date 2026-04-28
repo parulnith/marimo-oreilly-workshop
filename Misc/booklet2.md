@@ -15,7 +15,7 @@ One of the most common problems in technical work is the gap between local succe
 
 This happens because rerunning code is not the same as reproducing results. A rerun only tells you that something still works in your current setup. Reproducibility asks a harder question: would someone else, using the same code later or elsewhere, get the same outcome?
 
-> 💡 **Try it — `Module_2/2.1.ipynb`**
+> 💡 **Try it — `Module_2/2_1_environment_drift.ipynb`**
 >
 > **Example 1: scikit-learn version change**  
 > The notebook uses `CalibratedClassifierCV(method="temperature")`. In scikit-learn `1.8.0`, it works. In scikit-learn `1.7.2`, it fails.
@@ -64,12 +64,12 @@ So the workflow is:
 
 > **Note:** sandbox gives the strongest reproducibility because execution happens in an isolated environment.
 
-> 💡 **Try it — `Module_2/2.2.py`**
+> 💡 **Try it — `Module_2/2_2_sandboxed_environment.py`**
 >
 > Run the notebook and inspect the active Python, `pandas`, and `matplotlib` versions. Then reopen it in sandbox mode:
 >
 > ```bash
-> marimo edit --sandbox Module_2/2.2.py
+> marimo edit --sandbox Module_2/2_2_sandboxed_environment.py
 > ```
 
 **Script cue:**  
@@ -93,14 +93,14 @@ By contrast, the equivalent Jupyter notebook diff can become dramatically larger
 
 These diffs are not only difficult for an individual to read, they also make merge conflicts much harder to resolve in collaborative work.
 
-> 💡 **Try it — `Module_2/2.2.py`**
+> 💡 **Try it — `Module_2/2_2_sandboxed_environment.py`**
 >
 > Run the notebook. It shows a live one-line diff for a small code change, then the equivalent Jupyter diff for the same change.
 >
 > You can also inspect the diff in the terminal:
 >
 > ```bash
-> git diff Module_2/2.2.py
+> git diff Module_2/2_2_sandboxed_environment.py
 > ```
 >
 > If Git opens a pager, press `q` to exit. If you end up in Vim instead, use `:wq` to save and quit or `:q!` to quit without saving.
@@ -158,13 +158,13 @@ In this module, the key takeaway is that trustworthy AI depends on more than mod
 ### Code to Remember
 
 ```bash
-marimo edit --sandbox Module_2/2.2.py
+marimo edit --sandbox Module_2/2_2_sandboxed_environment.py
 ```
 
 Use this to show the strongest reproducibility setup: an isolated environment plus notebook-carried dependencies.
 
 ```bash
-git diff Module_2/2.2.py
+git diff Module_2/2_2_sandboxed_environment.py
 ```
 
 Use this to show that a plain Python notebook produces readable diffs.

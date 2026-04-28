@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
@@ -32,7 +32,7 @@ def _():
     import pandas as pd
     import time
 
-    return mo, pd, plt
+    return mo, pd, plt, time
 
 
 @app.function
@@ -45,11 +45,11 @@ def compound_interest(principal, rate, years):
 
 @app.cell
 def _():
-    principal = 10000
+    principal = 2000
     rate = 0.07
-    years = 50
-
+    years = 10
     growth = compound_interest(principal, rate, years)
+
     return growth, principal, rate, years
 
 
@@ -59,6 +59,12 @@ def _(growth, mo, rate, years):
     After **{years} years** at **{rate:.0%}**, the account grows to
     **${growth[-1]:,.2f}**.
     """)
+    return
+
+
+@app.cell
+def _(time):
+    time.sleep(5)
     return
 
 
@@ -103,6 +109,29 @@ def _(pd, principal, rates, years):
         )
     summary_df = pd.DataFrame(rows)
     summary_df
+    return
+
+
+@app.cell
+def _():
+    a = 1
+    return (a,)
+
+
+@app.cell
+def _():
+    b = 2
+    return (b,)
+
+
+@app.cell
+def _(a, b):
+    a+b
+    return
+
+
+@app.cell
+def _():
     return
 
 
