@@ -45,9 +45,9 @@ def compound_interest(principal, rate, years):
 
 @app.cell
 def _():
-    principal = 2000
+    principal = 1000
     rate = 0.07
-    years = 10
+    years = 20
     growth = compound_interest(principal, rate, years)
 
     return growth, principal, rate, years
@@ -127,11 +127,6 @@ def _():
 @app.cell
 def _(a, b):
     a+b
-    return
-
-
-@app.cell
-def _():
     return
 
 

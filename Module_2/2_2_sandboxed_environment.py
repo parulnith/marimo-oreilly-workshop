@@ -46,12 +46,15 @@ def _(mo):
 
 @app.cell
 def _():
+    import sys
     import sklearn
     from sklearn.calibration import CalibratedClassifierCV
     from sklearn.datasets import make_classification
     from sklearn.model_selection import train_test_split
     from sklearn.linear_model import LogisticRegression
 
+    print(f"python executable: {sys.executable}")
+    print(f"python version: {sys.version.split()[0]}")
     print(f"sklearn version: {sklearn.__version__}")
 
     X, y = make_classification(n_samples=300, n_features=10, random_state=42)

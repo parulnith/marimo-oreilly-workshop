@@ -1,27 +1,57 @@
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.3"
 app = marimo.App()
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    # Tiny Code Change, Small marimo Diff
+
+    Change `power = 3` to `power = 4`, save the file, then run:
+
+    ```bash
+    git diff Module_2/2_3_marimo_diff_demo.py
+    ```
+
+    The diff stays focused on the code because marimo notebooks are plain Python
+    files and do not store rendered outputs.
+    """)
+    return
 
 
 @app.cell
 def _():
-    import numpy as np
+    import marimo as mo
     import matplotlib.pyplot as plt
+    import numpy as np
 
-    return np, plt
+    return mo, np, plt
 
 
 @app.cell
-def _(np, plt):
-    x = np.linspace(-3, 3, 200)
-    y = x**3
+def _():
+    power = 3
+    return (power,)
 
-    fig, ax = plt.subplots()
-    ax.plot(x, y)
-    ax.set_title("y = x^3")
+
+@app.cell
+def _(np, plt, power):
+    rng = np.random.default_rng(7)
+    x = np.linspace(-3, 3, 800)
+    curve = x**power
+    noisy_curve = curve + rng.normal(scale=0.8, size=x.size)
+
+    fig, ax = plt.subplots(figsize=(8, 4.5), dpi=140)
+    ax.scatter(x, noisy_curve, s=8, alpha=0.35, label="simulated observations")
+    ax.plot(x, curve, color="black", linewidth=2.5, label=f"x^{power}")
+    ax.axhline(0, color="0.85", linewidth=1)
+    ax.axvline(0, color="0.85", linewidth=1)
+    ax.set_title(f"Model curve: y = x^{power}")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
+    ax.legend()
     fig
     return
 
