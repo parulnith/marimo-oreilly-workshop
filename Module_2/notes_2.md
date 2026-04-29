@@ -22,16 +22,16 @@
 
 #### How marimo helps
 
-marimo has built-in package management. If you import a package that is missing, it can prompt you to install it and record that dependency inside the notebook.
+marimo has built-in package management. If you import a package that is missing, it can prompt you to install it using your package manager.
 
-That matters even outside sandbox mode, because the notebook can carry its own dependency information instead of relying only on a separate `requirements.txt`.
+Outside sandbox mode, packages are installed into the active environment or project. In sandbox mode, marimo also records notebook-specific dependencies in the notebook file.
 
-Then `--sandbox` takes it one step further: marimo uses `uv` to create an isolated environment and can auto-install from the dependencies serialized in the notebook.
+Then `--sandbox` takes it one step further: marimo uses `uv` to create an isolated environment and can install from the dependencies serialized in the notebook.
 
 So the workflow is:
 
 - install on import
-- save dependencies with the notebook
+- save dependencies with the notebook in sandbox mode
 - use `--sandbox` for a clean, isolated run
 
 > **Note:** sandbox gives the strongest reproducibility because execution happens in an isolated environment.
@@ -116,6 +116,4 @@ Use this to show that a plain Python notebook produces readable diffs.
 ```
 
 Use this as the visual reminder that the environment is part of the work.
-
-
 

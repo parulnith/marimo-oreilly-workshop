@@ -6,6 +6,7 @@
 #     "matplotlib==3.10.7",
 #     "numpy",
 #     "pandas==2.3.3",
+#     "pyarrow==24.0.0",
 #     "scikit-learn==1.8.0",
 #     "tabicl",
 #     "vegafusion==2.0.3",
@@ -15,7 +16,7 @@
 
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.4"
 app = marimo.App(width="medium")
 
 

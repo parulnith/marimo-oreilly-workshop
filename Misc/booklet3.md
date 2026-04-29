@@ -1,5 +1,13 @@
 ## Module 3: Why Interactivity Accelerates AI Discovery
 
+### Opening
+
+Interactivity matters because it shortens the loop between noticing something, testing an idea, and learning from the result. In AI work, that loop often includes data inspection, feature choices, model behavior, and visual feedback. If those pieces live in separate tools or require manual reruns between steps, discovery slows down.
+
+In this module, the goal is to show what happens when those parts become one connected system. Data, controls, models, tables, and plots can all respond to one another in the same notebook.
+
+
+---
 
 ### 3.1 Interactive Computation as a Unified System
 
@@ -235,6 +243,51 @@ That is why interactivity accelerates discovery. It reduces the friction between
 > - Switch between TabICL and Random Forest in the debugging view and show how the same data can produce different failure patterns.
 > - Select a few misclassified rows and point out that the selected subset becomes live input for the next analysis step.
 
-
+**Script cue:**  
+Visual feedback is not just for display. It helps you decide what to check next, which model behavior matters, and where to intervene.
 
 ---
+
+### Closing
+
+Interactivity speeds up AI work because it keeps exploration, modelling, and debugging in one continuous loop. Instead of repeatedly stopping to rerun cells, rewrite plots, or move data into another tool, you can keep the notebook live and let each observation feed the next step.
+
+In this module, the key takeaway is that interactivity is not an extra layer on top of AI development. It changes how quickly you can discover patterns, test ideas, and debug model behavior.
+
+### 3 Takeaways to Remember
+
+1. **Interactivity turns the notebook into one live system.**  
+   Data, controls, models, and visualizations can all update together instead of living in separate steps.
+
+2. **Interactive exploration improves model development.**  
+   You can inspect data, adjust inputs, and feed those choices directly into modelling without breaking your flow.
+
+3. **Visual feedback speeds up debugging.**  
+   When plots, tables, and selections respond immediately, it becomes easier to connect model failures to the next experiment.
+
+### Code to Remember
+
+```bash
+marimo edit --sandbox Module_3/module_3.py
+```
+
+Use this to open the full interactive workflow in an isolated environment.
+
+```python
+selected_features_ui = mo.ui.multiselect(
+    options=feature_options,
+    value=feature_options,
+    label="Features to include in the model",
+)
+```
+
+Use this to show that user input can directly control modelling choices.
+
+```python
+data_explorer = mo.ui.data_explorer(df)
+```
+
+Use this to show that visual exploration can become part of the computation instead of staying separate from it.
+
+**Script cue:**  
+Interactive notebooks help you explore, model, and debug in one place. That faster feedback loop is what makes discovery happen sooner.
