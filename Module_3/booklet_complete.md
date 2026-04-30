@@ -764,7 +764,7 @@ The same `.py` file works in all of them. No conversion, no format mismatch, no 
 
 ## Module 3: Why Interactivity Accelerates AI Discovery
 
-Interactivity is most valuable when it turns a notebook into a single live system: data, controls, models, visualizations, and selections all working together and updating automatically. In this module, participants use one prepared marimo notebook, `module_3.py`, to move through that workflow end to end.
+Interactivity is most valuable when it turns a notebook into a single live system: data, controls, models, visualizations, and selections all working together and updating automatically. In this module, participants use one prepared marimo notebook, `3_1_interactive_ml_workflow.py`, to move through that workflow end to end.
 
 ---
 
@@ -779,7 +779,7 @@ That is the core idea of this module. The goal is not to write a notebook from s
 Open the prepared notebook:
 
 ```bash
-marimo edit --sandbox Module_3/module_3.py
+marimo edit --sandbox Module_3/3_1_interactive_ml_workflow.py
 ```
 
 This notebook already contains the full workflow. Participants work through it as a guided exercise.
@@ -884,7 +884,7 @@ The core idea of this module is practical: better context leads to better AI ass
 
 ### Hands-on Exercise (guided in marimo)
 
-Use marimo's AI features inside `Module_3/module_3.py`:
+Use marimo's AI features inside `Module_3/3_1_interactive_ml_workflow.py`:
 
 - generate or modify code directly in the active notebook
 - refactor an existing cell without leaving the editor
@@ -935,9 +935,9 @@ There are four main ways to use AI in the editor:
 marimo new "your prompt here"
 ```
 
-#### Hands-on: generate and refactor inside `module_3.py`
+#### Hands-on: generate and refactor inside `3_1_interactive_ml_workflow.py`
 
-Open `module_3.py` from Module 3.
+Open `3_1_interactive_ml_workflow.py` from Module 3.
 
 **Task 1 — Generate a new analysis cell.** Click **Generate with AI** and prompt:
 
@@ -1006,7 +1006,7 @@ These rules are useful in workshop settings because they keep AI-generated code 
 
 #### Hands-on: compare low-context and high-context prompts
 
-In `module_3.py`, open the Chat panel and try this plain prompt:
+In `3_1_interactive_ml_workflow.py`, open the Chat panel and try this plain prompt:
 
 *"Add a cell that explores which features are associated with model mistakes."*
 
@@ -1069,7 +1069,7 @@ For marimo, Ollama is the most straightforward local path when you want notebook
 
 #### Discussion prompt
 
-After demonstrating AI-assisted coding in `module_3.py`, ask:
+After demonstrating AI-assisted coding in `3_1_interactive_ml_workflow.py`, ask:
 
 - Which parts of this workflow would you trust to a hosted provider?
 - Which parts would you keep local because of privacy or control?
@@ -1112,7 +1112,7 @@ ollama pull qwen2.5-coder:7b
 
 In marimo settings → AI, set `model: ollama/qwen2.5-coder:7b` and `base_url: http://localhost:11434`.
 
-**Step 2 — Test with a real task.** In `module_3.py`, hover over Cell 5 and click Generate with AI. Prompt:
+**Step 2 — Test with a real task.** In `3_1_interactive_ml_workflow.py`, hover over Cell 5 and click Generate with AI. Prompt:
 
 *"Refactor this into a function called `prepare_data` that takes df, selected_features, and train_size as arguments and returns X_train, X_test, y_train, y_test."*
 
@@ -1142,7 +1142,7 @@ Module 5 brings everything full circle: once your interactive, AI-assisted, repr
 
 Everything you've built across this course — the reactive notebook, the reproducible environment, the interactive ML pipeline, the AI-assisted workflow — has lived in a single `.py` file. This module shows you how to take that file and do four things with it that are impossible with a traditional Jupyter notebook: run it as a script, serve it as a web app, publish it as a shareable artifact, and import from it as a Python module.
 
-Each section uses `module_3.py` from Module 3 as the working example. By the end of this module, the same file you built interactively will be running in four different modes — no duplication, no reformatting, no export step.
+Each section uses `3_1_interactive_ml_workflow.py` from Module 3 as the working example. By the end of this module, the same file you built interactively will be running in four different modes — no duplication, no reformatting, no export step.
 
 ---
 
@@ -1159,12 +1159,12 @@ This matters for ML pipelines because it means your interactive exploration and 
 **Step 1 — Run the notebook directly:**
 
 ```bash
-python module_3.py
+python 3_1_interactive_ml_workflow.py
 ```
 
 The notebook executes: data loads, preprocessing runs, TabICL fits, accuracy prints. No browser, no kernel, no UI. The reactive graph determines execution order automatically.
 
-**Step 2 — Add command-line arguments with argparse.** Open `module_3.py` and add a setup cell at the top (right-click the first cell → "Add setup cell"):
+**Step 2 — Add command-line arguments with argparse.** Open `3_1_interactive_ml_workflow.py` and add a setup cell at the top (right-click the first cell → "Add setup cell"):
 
 ```python
 import argparse
@@ -1212,7 +1212,7 @@ else:
 **Step 4 — Run with arguments:**
 
 ```bash
-python module_3.py --train-size 0.5 --features age hours-per-week capital-gain
+python 3_1_interactive_ml_workflow.py --train-size 0.5 --features age hours-per-week capital-gain
 ```
 
 The same notebook that runs interactively with sliders now accepts CLI arguments for automation. One file, both modes.
@@ -1221,14 +1221,14 @@ The same notebook that runs interactively with sliders now accepts CLI arguments
 
 ```bash
 # Run every day at 6am, log output
-0 6 * * * python /path/to/module_3.py --train-size 0.8 >> /logs/daily_run.log 2>&1
+0 6 * * * python /path/to/3_1_interactive_ml_workflow.py --train-size 0.8 >> /logs/daily_run.log 2>&1
 ```
 
 Or in a GitHub Action:
 
 ```yaml
 - name: Run notebook as script
-  run: python module_3.py --train-size 0.8
+  run: python 3_1_interactive_ml_workflow.py --train-size 0.8
 ```
 
 > **Docs:** [docs.marimo.io/guides/scripts](https://docs.marimo.io/guides/scripts/) — covers `argparse` and `simple-parsing` integration and scheduled execution patterns.
@@ -1248,7 +1248,7 @@ There is no conversion step, no framework to learn, no separate deployment file.
 **Step 1 — Launch in app mode:**
 
 ```bash
-marimo run module_3.py
+marimo run 3_1_interactive_ml_workflow.py
 ```
 
 Open the URL in your browser. You see the `mo.ui.dataframe()` explorer, the feature multiselect, the train size slider, the accuracy output, and the error scatter plot — all working reactively. The TabICL fit, the preprocessing pipeline, the matplotlib code — none of it is visible. It looks like a dashboard.
@@ -1280,7 +1280,7 @@ mo.hstack([
 **Step 5 — Share with a teammate.** If you're both on the same network:
 
 ```bash
-marimo run module_3.py --host 0.0.0.0 --port 8080
+marimo run 3_1_interactive_ml_workflow.py --host 0.0.0.0 --port 8080
 ```
 
 Your teammate opens `http://your-ip:8080` and gets the full interactive app. No Python, no marimo, no setup required on their end.
@@ -1302,7 +1302,7 @@ Not everyone needs the live app. Sometimes you want to send a link to a static r
 **Step 1 — Export to static HTML.** This captures your current notebook state — code, outputs, plots — as a single self-contained HTML file:
 
 ```bash
-marimo export html module_3.py -o report.html
+marimo export html 3_1_interactive_ml_workflow.py -o report.html
 ```
 
 Open `report.html` in any browser. No Python, no server. Share it as an email attachment, add it to a documentation site, or commit it to a repo. The plots, tables, and Markdown are all there.
@@ -1310,19 +1310,19 @@ Open `report.html` in any browser. No Python, no server. Share it as an email at
 To include pre-rendered outputs (so the HTML shows results immediately without running anything):
 
 ```bash
-marimo export html module_3.py -o report.html --include-outputs
+marimo export html 3_1_interactive_ml_workflow.py -o report.html --include-outputs
 ```
 
 **Step 2 — Export to PDF:**
 
 ```bash
-marimo export pdf module_3.py -o report.pdf
+marimo export pdf 3_1_interactive_ml_workflow.py -o report.pdf
 ```
 
 **Step 3 — Publish to molab.** Push your notebook to a GitHub repository, then generate a shareable molab preview URL:
 
 ```
-https://molab.marimo.io/github/<your-username>/<your-repo>/blob/main/module_3.py
+https://molab.marimo.io/github/<your-username>/<your-repo>/blob/main/3_1_interactive_ml_workflow.py
 ```
 
 Anyone with this URL sees a live preview of your notebook. They can fork it into their own molab workspace and run it — with the same sandbox environment, the same inline dependencies — without installing anything. This is the sharing story for research: one URL, fully reproducible.
@@ -1330,7 +1330,7 @@ Anyone with this URL sees a live preview of your notebook. They can fork it into
 **Step 4 — Generate a WASM-powered interactive HTML.** This exports your notebook as a self-contained HTML file that runs entirely in the browser via WebAssembly — no server needed, fully interactive:
 
 ```bash
-marimo export html-wasm module_3.py -o interactive_report.html
+marimo export html-wasm 3_1_interactive_ml_workflow.py -o interactive_report.html
 ```
 
 Open `interactive_report.html`. The sliders work. The model runs. Everything is live — powered by Python compiled to WebAssembly, running in the browser tab. You can host this on GitHub Pages, embed it in a documentation site, or send it directly.
@@ -1352,7 +1352,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install marimo
-      - run: marimo export html-wasm module_3.py -o docs/index.html
+      - run: marimo export html-wasm 3_1_interactive_ml_workflow.py -o docs/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
@@ -1377,7 +1377,7 @@ The only requirement is the **setup cell**: a special cell that runs before the 
 
 #### Hands-on: make your notebook importable
 
-**Step 1 — Create a setup cell.** In `module_3.py`, right-click the first cell and select **"Convert to setup cell"** (or add one via the cell menu). The setup cell is marked with a special indicator in the editor and always runs first.
+**Step 1 — Create a setup cell.** In `3_1_interactive_ml_workflow.py`, right-click the first cell and select **"Convert to setup cell"** (or add one via the cell menu). The setup cell is marked with a special indicator in the editor and always runs first.
 
 **Step 2 — Move reusable logic into the setup cell:**
 

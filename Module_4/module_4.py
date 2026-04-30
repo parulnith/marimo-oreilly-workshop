@@ -16,7 +16,7 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.4"
 app = marimo.App(width="medium")
 
 
@@ -57,30 +57,12 @@ def _(fetch_openml):
     df["income"] = (df["class"].str.strip() == ">50K").astype(int)
     df = df.drop(columns=["class"]).dropna()
     feature_options = [col for col in df.columns if col != "income"]
-    return df, feature_options
+    return (df,)
 
 
 @app.cell(hide_code=True)
 def _(df):
     df
-    return
-
-
-@app.cell
-def _(feature_options, mo):
-    column_selector = mo.ui.multiselect(
-        options=feature_options,
-        value=feature_options,
-        label="Select Columns"
-    )
-    column_selector
-    return (column_selector,)
-
-
-@app.cell
-def _(column_selector):
-
-    column_selector.value
     return
 
 

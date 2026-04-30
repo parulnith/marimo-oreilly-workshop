@@ -1,22 +1,4 @@
 ## Module 4: How to Use AI Coding Agents for AI/ML Development
-AI coding agents are most useful when they are integrated directly into your development environment and can work with the actual state of your notebook. While coding assistants can write code but for ML/AI, it makes more sense that they also have context about dataframes, model outputs, variables, and dependencies in memory.
-
- In ML and AI workflows, their value depends on:
-
-- when you let them generate or modify code
-- what notebook context they can see
-- what tools they are allowed to use
-- whether you run them through a hosted provider or a local/private setup
-
-The core idea of this module is better context leads to better AI assistance, and marimo is designed to provide that context inside the workflow itself.
-
-### Hands-on Exercise (guided in marimo)
-
-
-### AI-assisted coding in marimo
-
-marimo is an AI-native editor with support for full-cell AI code generation. marimo's AI assistant is specialized for working with data. Unlike traditional assistants that only see the text of your program, marimo's assistant can also work with the values of variables in memory.
-
 
 #### Getting set up
 
@@ -333,11 +315,6 @@ Then open the notebook and verify it runs cleanly end to end.
 
 ---
 
-Module 5 brings everything full circle: once your interactive, AI-assisted, reproducible notebook is working, how do you turn it into reusable systems that others can depend on?
 
-#### What's Next
-Quiz
 
-Use `Module_4/module-4-quiz-viewer.html` to review the key ideas from this module.
 
----

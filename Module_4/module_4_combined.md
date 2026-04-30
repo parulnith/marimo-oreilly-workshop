@@ -1,21 +1,5 @@
 # Module 4: How to Use AI Coding Agents for AI/ML Development
 
-AI coding agents are most useful when they are integrated directly into your development environment and can work with the actual state of your notebook. While coding assistants can write code, for ML/AI it makes more sense that they also have context about dataframes, model outputs, variables, and dependencies in memory.
-
-In ML and AI workflows, their value depends on:
-
-- when you let them generate or modify code
-- what notebook context they can see
-- what tools they are allowed to use
-- whether you run them through a hosted provider or a local/private setup
-
-The core idea of this module is: better context leads to better AI assistance, and marimo is designed to provide that context inside the workflow itself.
-
----
-
-## 4.1 AI-assisted coding in marimo
-
-marimo is an AI-native editor with support for full-cell AI code generation. marimo's AI assistant is specialized for working with data. Unlike traditional assistants that only see the text of your program, marimo's assistant can also work with the values of variables in memory.
 
 ### Getting set up
 
@@ -658,36 +642,95 @@ The main point is not to pick one tool universally. It is to understand the trad
 - Claude Code via `ollama launch` is useful when you want broader project-level assistance
 - Ollama Cloud is a good fallback when you want larger models without local downloads
 
----
-
-## Summary
-
-The right AI setup is the one that fits your data constraints, your workflow speed, and your task complexity. This module covered four layers of AI integration with marimo:
-
-| Layer | What it does | Section |
-|-------|-------------|---------|
-| **marimo's built-in AI** | Cell generation, refactoring, chat panel with variable context | 4.1–4.2 |
-| **External agents & MCP** | Claude Code, Codex, Gemini CLI working on the notebook as a file; MCP for tool bridging | 4.3 |
-| **Claude Code automation** | Hooks (automatic linting), commands (reusable prompts), skills (on-demand knowledge) | 4.4 |
-| **Local vs. cloud** | Ollama for privacy, hosted providers for capability, custom rules for consistency | 4.5 |
-
-What all options share is marimo's automatic variable context — your current state is always available to the agent, so your prompts stay short and your iterations stay fast regardless of which model is doing the work.
-
-Module 5 brings everything full circle: once your interactive, AI-assisted, reproducible notebook is working, how do you turn it into reusable systems that others can depend on?
-
-### What's Next
-
-Quiz
-
-Use `Module_4/module-4-quiz-viewer.html` to review the key ideas from this module.
+The right AI setup is the one that fits your data constraints, your workflow speed, and your task complexity. What all three options share is marimo's automatic variable context — your current state is always available to the agent, so your prompts stay short and your iterations stay fast regardless of which model is doing the work.
 
 ---
 
-## Further reading
+## 4.6 marimo check: linting for agents and humans
 
-- [Marimo docs: Using Claude Code](https://docs.marimo.io/guides/generate_with_ai/using_claude_code/)
-- [Marimo skills repository](https://github.com/marimo-team/skills)
-- [Claude Code docs: Hooks](https://code.claude.com/docs/en/hooks)
-- [Claude Code docs: Slash Commands](https://code.claude.com/docs/en/slash-commands)
-- [Claude Code docs: Skills](https://code.claude.com/docs/en/skills)
-- [Marimo docs: MCP](https://docs.marimo.io/guides/editor_features/mcp/)
+AI coding agents are capable of writing marimo notebooks quickly, but they sometimes violate marimo-specific rules — like redefining a variable across two cells, or creating a circular dependency. `marimo check` gives both you and your agent a fast feedback loop to catch and fix these issues before running the notebook.
+
+### What it catches
+
+`marimo check` focuses exclusively on marimo-specific correctness rules. It deliberately does not duplicate what tools like `ruff` or `mypy` already do. Key checks include:
+
+- **Multiple definitions** — the same variable name defined in more than one cell
+- **Circular dependencies** — cell A depends on cell B, which depends on cell A
+- **Formatting issues** — notebook structure that marimo cannot parse or execute reliably
+
+Error messages are actionable: they tell you exactly which cells conflict and suggest fixes (for example, renaming a variable with an underscore prefix to make it cell-local).
+
+### Running the linter
+
+Check a single notebook:
+
+```bash
+marimo check notebook.py
+```
+
+Check all notebooks in the current directory:
+
+```bash
+marimo check .
+```
+
+### Automated fixes
+
+For issues with obvious solutions, pass `--fix` to let marimo resolve them automatically:
+
+```bash
+marimo check --fix notebook.py
+```
+
+For more complex issues where the fix might change behaviour, use `--unsafe-fixes`:
+
+```bash
+marimo check --unsafe-fixes notebook.py
+```
+
+This is useful after an AI agent generates a notebook — run `marimo check --fix` as a cleanup step before opening the notebook.
+
+### JSON output for agents
+
+When an agent is doing the linting loop itself, the `--format=json` flag makes the output machine-readable:
+
+```bash
+marimo check --format=json notebook.py | jq '.issues[] | select(.severity == "breaking")'
+```
+
+This lets the agent read only the breaking issues and decide what to fix next, without parsing human-readable text.
+
+### CI integration
+
+Add a quality gate to your CI pipeline with the `--strict` flag, which treats warnings as errors:
+
+```yaml
+# .github/workflows/check-notebooks.yml
+name: Check Notebooks
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v1
+      - run: uv run marimo check --strict .
+```
+
+### Hands-on: lint the workshop notebook
+
+Run `marimo check` on the notebook you have been editing in this module:
+
+```bash
+marimo check Module_4/module_4.py
+```
+
+If there are issues, try:
+
+```bash
+marimo check --fix Module_4/module_4.py
+```
+
+Then open the notebook and verify it runs cleanly end to end.
+
+---

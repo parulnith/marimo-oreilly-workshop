@@ -15,7 +15,7 @@ Interactive computation becomes powerful when the notebook behaves like one live
 
 That is the main idea behind this notebook. It starts with the data, moves into visual exploration, then carries those choices directly into model training and debugging without breaking the flow.
 
-> 💡 **Try it — `Module_3/module_3.py`**
+> 💡 **Try it — `Module_3/3_1_interactive_ml_workflow.py`**
 
 go terminal - cd Module_3 - 
 
@@ -23,7 +23,7 @@ go terminal - cd Module_3 -
 > Open the notebook in sandbox mode:
 >
 > ```bash
-> marimo edit --sandbox Module_3/module_3.py
+> marimo edit --sandbox Module_3/3_1_interactive_ml_workflow.py
 > ```
 >
 > As you work through it, notice that the notebook is not divided into isolated phases. The same live state carries forward from data exploration to model comparison to error analysis.
@@ -268,7 +268,7 @@ In this module, the key takeaway is that interactivity is not an extra layer on 
 ### Code to Remember
 
 ```bash
-marimo edit --sandbox Module_3/module_3.py
+marimo edit --sandbox Module_3/3_1_interactive_ml_workflow.py
 ```
 
 Use this to open the full interactive workflow in an isolated environment.

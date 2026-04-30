@@ -26,23 +26,7 @@ def _(mo):
     # Interactive ML Workflow
 
     Here, we will see **data, controls, models, and plots** behave as one live
-    system. Widgets are variables, tables become inputs, model outputs feed new
-    analysis, and visual changes propagate automatically through the notebook.
-
-    Concretely, this notebook walks through:
-
-    - **Data** — raw dataframe + `mo.ui.data_editor` for editable samples
-    - **Visualization** — `mo.ui.data_explorer` and `mo.ui.dataframe` for
-      chart-first and transform-first exploration
-    - **Controls** — `mo.ui.multiselect` and `mo.ui.slider` to drive feature
-      selection and sampling
-    - **Models** — TabICL and Random Forest fit on the same live inputs
-    - **Error analysis** — `mo.ui.table` that sends selected rows back into
-      Python, closing the loop from model outputs to data
-
-    Start with the data, move into visual exploration, then fit models and use
-    their outputs to guide the next step of analysis — all without rerunning
-    cells.
+    system.
     """)
     return
 
@@ -67,7 +51,6 @@ def _():
         fetch_openml,
         mo,
         np,
-        pd,
         plt,
         roc_auc_score,
         train_test_split,
@@ -147,14 +130,14 @@ def _(df, mo):
 
 
 @app.cell
-def _(df, mo):
-    mo.ui.data_editor(df,editable_columns=['age','education'])
+def _(data_editor):
+    data_editor.value
     return
 
 
 @app.cell
-def _(data_editor):
-    data_editor.value
+def _(df, mo):
+    mo.ui.data_editor(df,editable_columns=['age','education'])
     return
 
 
@@ -567,7 +550,7 @@ def _(
         | False negatives | `{len(fn):,}` |
         """
     )
-    return display_errors, results_df
+    return (display_errors,)
 
 
 @app.cell
@@ -590,44 +573,6 @@ def _(display_errors, mo, preview_rows):
         label="Select misclassified rows to inspect",
     )
     error_table
-    return (error_table,)
-
-
-@app.cell
-def _(error_table, mo, pd, results_df):
-
-
-    selected = error_table.value
-    mo.stop(
-        len(selected) == 0,
-        mo.callout(
-            mo.md("Select one or more rows in the error table to see a feature summary."),
-            kind="info",
-        ),
-    )
-
-    selected_cols = list(selected.columns) if isinstance(selected, pd.DataFrame) else []
-    stats_cols = [
-        col
-        for col in ["age", "hours-per-week", "education-num", "capital-gain", "proba_positive"]
-        if col in selected_cols and col in results_df.columns
-    ]
-    rows_md = "\n".join(
-        f"| `{col}` | {selected[col].mean():.2f} | {results_df[col].mean():.2f} |"  # ty:ignore[invalid-argument-type, not-subscriptable]
-        for col in stats_cols
-    )
-    mo.vstack(
-        [
-            mo.md(f"**{len(selected)} error rows selected**"),
-            mo.md(
-                f"""
-                | Feature | Selected mean | Full test mean |
-                |---|---|---|
-                {rows_md}
-                """
-            ),
-        ]
-    )
     return
 
 
