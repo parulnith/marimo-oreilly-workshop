@@ -88,6 +88,26 @@ When experimental work is easy to review, reproducibility gets stronger. Clear d
 
 ---
 
+#### Editor workflow: VS Code
+
+Because marimo notebooks are plain `.py` files, they are not locked to the
+browser editor. You can open them directly in VS Code, review them like normal
+Python files, and use standard Git tooling.
+
+For a more integrated notebook experience in VS Code, install the official
+marimo extension:
+
+```text
+marimo VS Code extension
+https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo
+```
+
+Teaching point: marimo keeps the notebook workflow, but the file still behaves
+like normal Python for editors, diffs, reviews, and project tooling.
+
+
+---
+
 
 ### Code to Remember
 
@@ -103,6 +123,13 @@ git diff Module_2/2_3_marimo_diff_demo.py
 
 Use this to show that a plain Python notebook produces readable diffs.
 
+```text
+VS Code extension:
+https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo
+```
+
+Use this to show that marimo notebooks can live in a normal editor workflow.
+
 ```python
 # dependencies live with the notebook
 # /// script
@@ -116,4 +143,3 @@ Use this to show that a plain Python notebook produces readable diffs.
 ```
 
 Use this as the visual reminder that the environment is part of the work.
-

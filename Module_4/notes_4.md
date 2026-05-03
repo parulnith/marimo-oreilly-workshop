@@ -1,291 +1,199 @@
-## Module 4: How to Use AI Coding Agents for AI/ML Development
+# Module 4: How to Use AI Coding Agents for AI/ML Development
 
-#### Getting set up
 
-To use AI generation in marimo:
+Live notebook:
 
-1. Install the required dependencies through the notebook settings
-2. Configure your LLM provider in the AI tab of the settings menu
+```bash
+marimo edit Module_4/4_ai_features_demo.py
+```
 
-marimo works with hosted providers such as OpenAI, Anthropic, and Google, as well as local models served through Ollama and other OpenAI-compatible providers.
+---
 
-Several marimo AI features rely on your `marimo.toml` configuration file. Locate it with:
+## 4.1 When to Let AI Agents Write Code for You
+
+### What to teach
+
+- **Generate with AI**: add a new cell from a prompt.
+- **Inline autocomplete**: complete code while typing.
+- **Refactor current cell**: modify one existing cell with `Ctrl/Cmd-Shift-E`.
+- **Chat panel**: ask notebook-level questions or insert generated cells.
+- **`marimo new`**: generate a whole notebook from the command line.
+
+### Setup checkpoint
+
+Before the demos:
+
+1. Open marimo notebook settings.
+2. Install AI dependencies if prompted.
+3. Open the **AI** tab.
+4. Choose a hosted provider or local Ollama model.
+
+Find the config file:
 
 ```bash
 marimo config show | head
 ```
 
-#### The main entry points
+### Demo: Generate with AI
 
-There are four main ways to use AI in the editor:
-
-- **Generate new cells** with the **Generate with AI** button at the bottom of the notebook
-- **inline autocompletion, similar to Copilot-style tools**
-- **Refactor the current cell** with `Ctrl/Cmd-Shift-E`
-- **Use the Chat panel** to ask notebook-level questions or generate cells from a side panel
-- **Generate entire notebooks** from the command line with:
-
-```bash
-marimo new "your prompt here"
-```
-
-#### 4.1 Hands-on: generate and refactor inside `module_4.py`
-
-Open `module_4.py` from Module 4.
-
-**Task 1 — Generate a new analysis cell.** Click **Generate with AI** and prompt:
-
-*"Add a new cell below the model-comparison section that compares the top 5 occupations for rows predicted as high income versus low income."*
-
-Review the generated code, then insert it into the notebook.
-
-**Task 2 — Refactor an existing cell.** Click into the preprocessing/modeling part of the notebook and press `Ctrl/Cmd-Shift-E`.
+Notebook section: **1. Generate with AI**
 
 Prompt:
 
-*"Refactor this cell so the preprocessing logic is moved into a helper function called `prepare_features`."*
-
-The point of the exercise is not to accept AI output blindly. It is to review generated code in the same notebook where it will run.
-
----
-
-### 4.2 Context, prompts, and tools
-
-The quality of AI assistance depends heavily on context. marimo improves that context in several ways.
-
-#### Variable context with `@`
-
-marimo's AI assistant already has the notebook code as context. You can additionally pass variables and their values to the assistant by tagging them with `@`.
-
-For example:
-
-- `@df` includes the dataframe `df`
-- `@feature_options` includes the available feature list
-- `@column_selector` includes the current column-selection widget state
-
-This is especially useful in notebook work because the assistant is not guessing your schema from text alone. It can work from the current notebook state.
-
-#### Chat panel modes
-
-The Chat panel supports three modes:
-
-- **Manual** — no tool access; the model responds only from the conversation and any manually injected context
-- **Ask** — read-only tools plus context gathering, so the assistant can inspect the notebook
-- **Agent (beta)** — everything in Ask mode plus the ability to edit notebook cells and run stale cells
-
-```
-What patterns do you see between age, hours-per-week, and income in @df?
+```text
+Using df, add a new cell that groups rows by segment and shows average revenue,
+average profit, and average satisfaction. Return a dataframe named
+segment_summary.
 ```
 
+Review:
 
-#### Prompt templates and custom rules
+- Did it reuse `df`?
+- Did it avoid recreating data?
+- Is the output variable clear?
 
-marimo provides prompt templates for common notebook tasks, which is useful when participants know roughly what they want but need a stronger prompt.
+### Demo: Inline autocomplete
 
-marimo also supports **custom rules** in settings so that AI output stays consistent across prompts and providers. For example:
+Notebook section: **2. Inline autocompletion**
+
+In the `autocomplete_workspace` cell, type:
+
+```python
+# Return True when revenue is above 60000 and satisfaction is at least 8.
+def flag_high_value_account(row):
+```
+
+Then add:
+
+```python
+df["high_value"] = df.apply(flag_high_value_account, axis=1)
+df
+```
+
+### Demo: Refactor current cell
+
+Notebook section: **3. Refactor the current cell**
+
+Click into the repetitive `region_revenue_summary` cell and press
+`Ctrl/Cmd-Shift-E`.
+
+Prompt:
 
 ```text
-Always use matplotlib for plotting.
-Prefer pandas over polars.
-Use type hints for helper functions.
-Use f-strings for string formatting.
+Refactor this cell into a helper function named summarize_region_metric that
+takes df and metric as inputs, then returns the same region-level summary.
+Keep the output dataframe named region_revenue_summary.
 ```
 
-These rules are useful in workshop settings because they keep AI-generated code aligned with the style you are teaching.
-
-#### Hands-on: compare low-context and high-context prompts
-
-In `module_4.py`, open the Chat panel and try this plain prompt:
-
-*"Add a cell that summarizes the selected columns and shows how they relate to income."*
-
-Then try a richer prompt:
-
-*"Using @df and @column_selector, add a cell that analyzes the columns selected in the widget and compares their relationship to income."*
-
-Compare the two results. The second prompt should usually be more specific, more aligned with the notebook, and require less cleanup.
+Teaching point: AI is strongest for small changes when you can immediately run
+and inspect the result.
 
 ---
 
-### 4.3 Agents, MCP, copilots, and setup choices
+## 4.2 Giving AI Coding Agents the Context They Need
 
-marimo supports richer AI workflows than just cell generation.
+Your code is only part of the story. For AI/ML work, the assistant also needs
+execution state, dataframe schemas, widget values, model outputs, and dependency
+information.
 
-#### Agents
+### Context in marimo
 
-marimo supports external agents such as Claude Code, Codex, and Gemini CLI. These are useful when you want the assistant to work across multiple cells or operate on the notebook as a file rather than just generating one block of code at a time.
+marimo helps because notebooks are reactive and stateful:
 
+- `@df` gives the assistant dataframe context.
+- `@metric_selector` gives the current widget value.
+- `@segment_selector` gives the selected segment values.
+- Existing variables and cell dependencies make the notebook easier to inspect.
 
+### Demo: Chat with variable context
 
-This matters because marimo notebooks are stored as plain `.py` files. External agents can read notebook structure directly instead of trying to reason over notebook JSON.
+Notebook section: **4. Chat panel with variable context**
 
-#### MCP
+Chat panel modes:
 
-marimo also supports the **Model Context Protocol (MCP)**:
+- **Manual**: no tool access; the model responds only from the conversation and
+  manually injected context.
+- **Ask**: read-only tools plus context gathering, so the assistant can inspect
+  the notebook.
+- **Agent (beta)**: everything in Ask mode plus the ability to edit notebook
+  cells and run stale cells.
 
-- **as an MCP server** — marimo exposes notebook-aware AI tools to external applications
-- **as an MCP client** — marimo connects supported MCP servers into its Chat panel
+Prompt A:
 
-The current docs describe MCP as an experimental feature, so it is best treated as an advanced workflow rather than the default workshop path.
+```text
+What patterns do you see in this data?
+```
 
-**Server mode** is useful when you want external tools such as Claude Code to interact with a running marimo notebook. The docs show starting marimo with MCP support like this:
+Prompt B:
+
+```text
+Using @df, @metric_selector, and @segment_selector, add a cell that summarizes
+the selected metric for the selected segments and creates a simple matplotlib
+bar chart.
+```
+
+Teaching point: the second prompt is better because it gives the agent concrete
+notebook state instead of asking it to guess.
+
+### Custom instructions and rules
+
+Use custom rules in marimo settings to keep AI output consistent across prompts
+and providers:
+
+```text
+Use pandas for tabular transformations.
+Use matplotlib for plots.
+Keep generated cells small.
+Avoid reloading data that already exists in the notebook.
+```
+
+For external agents, keep project-level instructions short and concrete. Good
+instructions include:
+
+- which notebook command to run
+- which style to follow
+- whether to prefer pandas, polars, matplotlib, or plotly
+- whether to run `marimo check` after edits
+
+Teaching point: prompts are for one task; custom rules and project instructions
+are for repeated behavior.
+
+### Linting and safety loop
+
+AI can write valid Python that is invalid marimo. Always check after AI edits:
 
 ```bash
-uv run --with="marimo[mcp]" marimo edit notebook.py --mcp --no-token
+uvx marimo check Module_4/4_ai_features_demo.py
 ```
 
-Once running, Claude Code can connect to the marimo MCP server with:
+Apply safe fixes when available:
 
 ```bash
-claude mcp add --transport http marimo http://localhost:PORT/mcp/server
+uvx marimo check --fix Module_4/4_ai_features_demo.py
 ```
 
-The docs also note that marimo's MCP server exposes AI tools plus prompts such as `active_notebooks` and `errors_summary`.
-
-**Client mode** is useful inside marimo itself. According to the docs, marimo currently supports these MCP server presets in the Chat panel:
-
-- `marimo` for official marimo documentation, API reference, and code examples
-- `context7` for up-to-date, version-specific documentation from official sources
-
-You can enable these in the AI settings UI or in `marimo.toml`:
-
-```toml
-[mcp]
-presets = ["marimo", "context7"]
-```
-
-Once configured, those tools are available in the Chat panel when using Ask mode.
-
-Source: https://docs.marimo.io/guides/editor_features/mcp/
-
-
----
-
-### 4.4 Local versus cloud-hosted setups
-
-For marimo, Ollama is the most straightforward local path when you want notebook AI without sending notebook context to a hosted provider.
-
-Use [Ollama-Setup.md](/Users/parulpandey/Desktop/Marimo%20Workshop/Module_4/Ollama-Setup.md) as the setup handout. The booklet only covers where Ollama fits in the workflow.
-
-#### Option A: Use Ollama inside marimo
-
-After Ollama is running locally, pull one of the workshop models:
+Strict final check:
 
 ```bash
-ollama pull gemma3:270m
-ollama pull gemma2:2b
+uvx marimo check --strict Module_4/4_ai_features_demo.py
 ```
 
-Then in marimo settings → AI, set:
+What it catches:
 
-```toml
-[ai.completion]
-model = "ollama/gemma2:2b"
-base_url = "http://localhost:11434"
-```
+- duplicate variable definitions
+- dependency cycles
+- invalid notebook structure
+- formatting issues that marimo cannot parse or execute reliably
 
-This gives you local AI assistance inside marimo without sending notebook context to a hosted provider.
-
-#### Option B: Use Claude Code through Ollama
-
-If you want an external coding agent experience, Ollama can also launch Claude Code directly:
+For agent workflows, JSON output can be useful:
 
 ```bash
-ollama launch claude --model qwen3-coder-next:cloud
+uvx marimo check --format=json Module_4/4_ai_features_demo.py
 ```
 
-This is useful when you want the agent to work across the notebook file, terminal, and surrounding project instead of only inside marimo's editor UI.
-
-#### Hands-on: compare the two workflows
-
-**Step 1 — Test marimo with a local model.** In `module_4.py`, hover over the empty cell near the end of the notebook and click Generate with AI. Use this prompt:
-
-*"Add a new cell that uses @df and @column_selector to summarize the selected columns and visualize how one or two selected features relate to income."*
-
-Run the result. Does it use the selected columns correctly? Does it reference `df` and the widget state properly?
-
-**Step 2 — Try the same task with Claude Code launched through Ollama.** Compare the output quality, how it handles notebook structure, and how many edits you need to make before running it.
-
-**Step 3 — Set your custom rules** in AI settings, then regenerate. Notice how the output quality improves when the agent has persistent preferences to follow:
-
-```
-Use marimo UI elements (mo.ui.*) for interactivity wherever applicable.
-Use matplotlib for all plots with figsize=(7, 4) and tight_layout.
-One primary variable returned per cell. Wrap intermediate logic in functions.
-```
-
-The main point is not to pick one tool universally. It is to understand the tradeoff:
-
-- marimo + local Ollama keeps context private and works well for notebook-scoped generation
-- Claude Code via `ollama launch` is useful when you want broader project-level assistance
-- Ollama Cloud is a good fallback when you want larger models without local downloads
-
----
-
-The right AI setup is the one that fits your data constraints, your workflow speed, and your task complexity. What all three options share is marimo's automatic variable context — your current state is always available to the agent, so your prompts stay short and your iterations stay fast regardless of which model is doing the work.
-
----
-
-### 4.5 marimo check: linting for agents and humans
-
-AI coding agents are capable of writing marimo notebooks quickly, but they sometimes violate marimo-specific rules — like redefining a variable across two cells, or creating a circular dependency. `marimo check` gives both you and your agent a fast feedback loop to catch and fix these issues before running the notebook.
-
-#### What it catches
-
-`marimo check` focuses exclusively on marimo-specific correctness rules. It deliberately does not duplicate what tools like `ruff` or `mypy` already do. Key checks include:
-
-- **Multiple definitions** — the same variable name defined in more than one cell
-- **Circular dependencies** — cell A depends on cell B, which depends on cell A
-- **Formatting issues** — notebook structure that marimo cannot parse or execute reliably
-
-Error messages are actionable: they tell you exactly which cells conflict and suggest fixes (for example, renaming a variable with an underscore prefix to make it cell-local).
-
-#### Running the linter
-
-Check a single notebook:
-
-```bash
-marimo check notebook.py
-```
-
-Check all notebooks in the current directory:
-
-```bash
-marimo check .
-```
-
-#### Automated fixes
-
-For issues with obvious solutions, pass `--fix` to let marimo resolve them automatically:
-
-```bash
-marimo check --fix notebook.py
-```
-
-For more complex issues where the fix might change behaviour, use `--unsafe-fixes`:
-
-```bash
-marimo check --unsafe-fixes notebook.py
-```
-
-This is useful after an AI agent generates a notebook — run `marimo check --fix` as a cleanup step before opening the notebook.
-
-#### JSON output for agents
-
-When an agent is doing the linting loop itself, the `--format=json` flag makes the output machine-readable:
-
-```bash
-marimo check --format=json notebook.py | jq '.issues[] | select(.severity == "breaking")'
-```
-
-This lets the agent read only the breaking issues and decide what to fix next, without parsing human-readable text.
-
-#### CI integration
-
-Add a quality gate to your CI pipeline with the `--strict` flag, which treats warnings as errors:
+For shared workshop repos, this can also become a CI quality gate:
 
 ```yaml
-# .github/workflows/check-notebooks.yml
 name: Check Notebooks
 on: [push, pull_request]
 jobs:
@@ -297,24 +205,200 @@ jobs:
       - run: uv run marimo check --strict .
 ```
 
-#### Hands-on: lint the workshop notebook
-
-Run `marimo check` on the notebook you have been editing in this module:
-
-```bash
-marimo check Module_4/module_4.py
-```
-
-If there are issues, try:
-
-```bash
-marimo check --fix Module_4/module_4.py
-```
-
-Then open the notebook and verify it runs cleanly end to end.
+Teaching point: context improves generation; linting makes the result safe to
+keep.
 
 ---
 
+## 4.3 Choosing the Right AI Coding Agent Setup
 
+The right setup depends on cost, speed, privacy, control, and task complexity.
+Start with the built-in editor features, then move to agent workflows when the
+task spans multiple cells or files.
 
+### Option A: Built-in marimo AI
 
+Use for:
+
+- generating one cell
+- refactoring one cell
+- asking notebook-level questions
+- working with `@` variable context
+
+Best when you want fast iteration inside the notebook.
+
+### Option B: Local models with Ollama
+
+Use when privacy matters or you want local experimentation.
+
+See:
+
+```text
+Module_4/Ollama-Setup.md
+```
+
+Example marimo config:
+
+```toml
+[ai.completion]
+model = "ollama/gemma2:2b"
+base_url = "http://localhost:11434"
+```
+
+Tradeoff: more privacy and control, but smaller local models may produce weaker
+code than hosted models.
+
+### Option C: Generate a whole notebook
+
+Use `marimo new` when you want a fresh notebook scaffold:
+
+```bash
+marimo new "create a marimo notebook with a small sales dataframe, a dropdown for region, and a bar chart of revenue by segment"
+```
+
+Teaching point:
+
+- **Generate with AI** adds to the current notebook.
+- **Chat** works inside the current notebook.
+- **`marimo new`** starts a new notebook.
+
+### The three advanced pieces
+
+Once the built-in editor features are clear, introduce the newer agent-facing
+tools as three separate ideas:
+
+1. **Agents / marimo pair**: connect an external coding agent to a live
+   notebook.
+2. **MCP**: expose notebook-aware tools or bring external tools into Chat.
+3. **Skills / custom instructions**: give agents reusable behavior and project
+   conventions.
+
+### 1. Agents: marimo pair with an agent CLI
+
+This is the important new workflow to teach.
+
+`marimo pair` connects agent CLIs such as Claude Code, Codex, and OpenCode to a
+running marimo notebook. The agent can inspect variables, test logic, run cells,
+edit cells, and interact with UI elements.
+
+Install:
+
+```bash
+npx skills add marimo-team/marimo-pair
+```
+
+or:
+
+```bash
+uvx deno -A npm:skills add marimo-team/marimo-pair
+```
+
+Pair with the demo notebook:
+
+```text
+/marimo-pair pair with me on Module_4/4_ai_features_demo.py
+```
+
+Use marimo pair for:
+
+- fixing several broken cells
+- adding a complete section
+- inspecting live variable values before editing
+- refactoring across multiple cells
+- debugging UI behavior
+
+Teaching point: use editor AI for cell-level work; use marimo pair when the
+assistant needs live notebook state and multi-cell control.
+
+Source: https://docs.marimo.io/guides/generate_with_ai/marimo_pair/
+
+### 2. MCP: tool context for notebooks
+
+MCP is experimental, but it is important to mention because it explains how
+notebook-aware tools can be shared with agents and Chat.
+
+marimo supports MCP in two directions:
+
+- **MCP server**: exposes marimo notebook tools to external apps such as Claude
+  Code, Cursor, or VS Code.
+- **MCP client**: connects tools into marimo's Chat panel.
+
+Start marimo with MCP support:
+
+```bash
+uv run --with="marimo[mcp]" marimo edit Module_4/4_ai_features_demo.py --mcp --no-token
+```
+
+Or with `uvx`:
+
+```bash
+uvx "marimo[mcp]" edit Module_4/4_ai_features_demo.py --mcp --no-token
+```
+
+Connect Claude Code to the running marimo MCP server:
+
+```bash
+claude mcp add --transport http marimo http://localhost:PORT/mcp/server
+```
+
+Enable useful MCP client presets in `marimo.toml`:
+
+```toml
+[mcp]
+presets = ["marimo", "context7"]
+```
+
+Teaching point: use marimo pair for a guided agent workflow; use MCP when you
+want notebook-aware tools available to external apps or Chat.
+
+Source: https://docs.marimo.io/guides/editor_features/mcp/
+
+### 3. Skills and custom instructions
+
+Skills are reusable instruction bundles for coding agents.
+
+Install marimo's official skills:
+
+```bash
+npx skills add marimo-team/skills
+```
+
+Use skills for:
+
+- creating marimo notebooks
+- converting notebooks
+- building custom widgets
+
+Custom instructions are the lightweight version of skills. Use them for project
+conventions:
+
+```text
+Use marimo notebooks in Python script format.
+Prefer pandas and matplotlib in workshop notebooks.
+Run uvx marimo check after editing a notebook.
+Keep generated cells small and readable.
+```
+
+Teaching point: use custom instructions for repeated project preferences; use
+skills for specialized workflows. Do not install every skill by default. Too
+much agent context can make tool choice worse.
+
+Source: https://docs.marimo.io/guides/generate_with_ai/skills/
+
+---
+
+## Instructor Flow
+
+1. Open `Module_4/4_ai_features_demo.py`.
+2. Configure AI in settings.
+3. Show the five editor entry points.
+4. Generate one cell.
+5. Show inline autocomplete.
+6. Refactor one cell.
+7. Compare Chat prompts with and without `@` context.
+8. Add custom rules and rerun one prompt.
+9. Run the linting loop: `check`, `--fix`, `--strict`.
+10. Show `marimo new`.
+11. Teach local versus hosted tradeoffs.
+12. Teach the three advanced pieces: **agents/marimo pair**, **MCP**, and
+    **skills/custom instructions**.
