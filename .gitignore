@@ -156,6 +156,14 @@ __marimo__/
 
 # Local assistant instructions
 CLAUDE.md
-Misc
+Misc/
 skrub
 summary.md
+add_stuff.md
+
+# Generated outputs / scratch
+results.csv
+*.log
+**/layouts/
+# CI / GitHub
+.github/

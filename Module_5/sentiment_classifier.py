@@ -5,22 +5,8 @@
 
 import marimo
 
-__generated_with = "0.20.4"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
-
-with app.setup:
-    import marimo as mo
-    import pandas as pd
-    import altair as alt
-    import json
-    import os
-    from openai import OpenAI
-
-    SYSTEM_PROMPT = (
-        "You are a sentiment classifier. "
-        "Classify the sentiment of the product review given by the user. "
-        'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", "confidence": <0.0-1.0>, "reason": "<one sentence>"}'
-    )
 
 
 @app.cell(hide_code=True)
@@ -28,22 +14,57 @@ def _():
     mo.md("""
     # Module 5: From Interactive Work to Reusable Systems
 
-    Everything you have built across this workshop lives in a single `.py` file.
+    ## What this notebook does
 
-    This module closes that gap. The working example is an **LLM sentiment
-    classifier** — a notebook that sends product reviews to a local Ollama model
-    and returns labels with confidence scores.
+    This is a small **LLM evaluation harness** built around a single task:
+    classify the sentiment of a **product review** as `positive`, `negative`, or
+    `neutral`, with a confidence score and a one-sentence reason.
 
-    By the end, the same file will run in four modes
+    It runs the same set of reviews through **two local Ollama models** (default:
+    `gemma3:1b` vs. `qwen2.5:0.5b`) so you can compare their behaviour
+    side by side, not just whether they agree on the label, but how confident
+    each one is and how it justifies the call.
+
+
+    ## How the eval works
+
+    For every review, each model returns structured JSON: a label, a confidence
+    in [0, 1], and a short reason. You then mark each prediction ✓ or ✗ in the
+    UI. The notebook aggregates those judgements into a live accuracy dashboard
+    so the eval is **human-in-the-loop**, not an automated metric. 
+
+    ## Same file, four modes
+
+    The same `.py` file runs as an interactive notebook, a clean web app, a
+    headless CLI script, and an importable Python module — that's the Module 5
+    point.
 
     | Mode | Command |
     |------|---------|
-    | Interactive notebook | `marimo edit module_5.py` |
-    | Clean web app | `marimo run module_5.py` |
-    | Headless script | `python module_5.py -- --model-a gemma3:1b --model-b qwen2.5:0.5b` |
-    | Importable module | `from module_5 import get_client, classify_batch` |
+    | Interactive notebook | `marimo edit sentiment_classifier.py` |
+    | Clean web app | `marimo run sentiment_classifier.py` |
+    | Headless script | `uv run sentiment_classifier.py -- --model-a gemma3:1b --model-b qwen2.5:0.5b --output results.csv` |
+    | Importable module | `from sentiment_classifier import get_client, compare_two_models` |
     """)
-    return
+    return (mo,)
+
+
+with app.setup:
+    import argparse
+    import json
+    import os
+
+    import altair as alt
+    import marimo as mo
+    import pandas as pd
+    from openai import OpenAI
+
+    SYSTEM_PROMPT = (
+        "You are a sentiment classifier. "
+        "Classify the sentiment of the product review given by the user. "
+        'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", '
+        '"confidence": <0.0-1.0>, "reason": "<one sentence>"}'
+    )
 
 
 @app.function
@@ -52,73 +73,85 @@ def get_client(base_url="http://localhost:11434/v1", api_key="ollama"):
 
 
 @app.function
-def classify_text(client, text, model="gemma3:1b"):
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": text},
-            ],
-            temperature=0.0,
-        )
-        raw = (response.choices[0].message.content or "").strip().strip("```json").strip("```").strip()
-        parsed = json.loads(raw)
-        return {
-            "text": text,
-            "label": parsed.get("label", "neutral"),
-            "confidence": round(float(parsed.get("confidence", 0.5)), 3),
-            "reason": parsed.get("reason", ""),
-            "model": model,
-            "error": None,
-        }
-    except Exception as exc:
-        return {"text": text, "label": "error", "confidence": 0.0, "reason": str(exc), "model": model, "error": str(exc)}
-
-
-@app.function
-def classify_batch(client, texts, model="gemma3:1b"):
-    return pd.DataFrame([classify_text(client, t, model) for t in texts])
-
-
-@app.function
-def summarize_results(df):
-    ok = df[df["label"] != "error"]
-    return {
-        "total": len(df),
-        "successful": len(ok),
-        "label_counts": ok["label"].value_counts().to_dict() if len(ok) else {},
-        "avg_confidence": round(float(ok["confidence"].mean()), 3) if len(ok) else 0.0,
-    }
-
-
-@app.function
-def filter_by_label(df, label="All"):
-    if label == "All":
-        return df
-    return df[df["label"] == label].reset_index(drop=True)
+def compare_two_models(client, texts, model_a, model_b):
+    """Send each review to both models and return one combined DataFrame."""
+    rows = []
+    for text in texts:
+        for model in (model_a, model_b):
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": text},
+                    ],
+                    temperature=0.0,
+                )
+                raw = (response.choices[0].message.content or "").strip()
+                raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+                parsed = json.loads(raw)
+                rows.append({
+                    "text": text,
+                    "model": model,
+                    "label": parsed.get("label", "neutral"),
+                    "confidence": round(float(parsed.get("confidence", 0.5)), 3),
+                    "reason": parsed.get("reason", ""),
+                })
+            except Exception as exc:
+                rows.append({
+                    "text": text, "model": model,
+                    "label": "error", "confidence": 0.0, "reason": str(exc),
+                })
+    return pd.DataFrame(rows)
 
 
 @app.function
 def sample_reviews():
     return [
-        "Absolutely love this product! Fast shipping and works perfectly.",
-        "Terrible experience. Broke after two days and support was unhelpful.",
-        "It's okay. Does what it says but nothing special.",
-        "Exceeded my expectations. Highly recommend to anyone looking for quality.",
-        "Packaging was damaged, product inside seemed fine but I'm not happy.",
-        "Great value for money. Using it daily for three months with no issues.",
-        "Instructions were confusing and setup took way too long.",
-        "Customer service responded quickly and resolved my issue same day.",
-        "Average product. Works but feels a bit cheap.",
-        "Would not buy again. Stopped working after a week.",
+        "Oh wonderful, another charger that lasts a whole three weeks. Just what I needed.",
+        "The product itself is fantastic — the courier on the other hand left it in the rain.",
+        "Not bad. Not great. I keep using it, which probably says something.",
+        "I wanted to hate this but I can't. Annoyingly good.",
+        "Five stars for the packaging. The thing inside? Different story.",
+        "Does exactly what the listing says. That is neither a compliment nor a complaint.",
+        "Returned it. Then bought it again. Make of that what you will.",
+        "If you enjoy reading 40-page manuals to brew coffee, this is the product for you.",
+        "Customer service was great. Shame I had to call them four times.",
+        "Honestly underwhelming for the price, but I can see why some people love it.",
+        "Build quality is solid, instructions are a war crime.",
+        "It works. My cat is unimpressed. I am cautiously optimistic.",
     ]
 
 
 @app.cell(hide_code=True)
-def _():
+def _(mo):
     mo.md("""
-    ## LLM Model Comparison
+    ## CLI arguments
+
+    The cell below defines the command-line flags this notebook accepts
+    (`--model-a`, `--model-b`, `--base-url`, `--output`). It uses Python's
+    standard `argparse`.
+    """)
+    return
+
+
+@app.cell
+def _(argparse):
+    parser = argparse.ArgumentParser(
+        description="Compare two Ollama models on a set of reviews.",
+    )
+    parser.add_argument("--model-a", default="gemma3:1b")
+    parser.add_argument("--model-b", default="qwen2.5:0.5b")
+    parser.add_argument("--base-url", default="http://localhost:11434/v1")
+    parser.add_argument("--output", default=None, help="Optional CSV path for results")
+    args, _ = parser.parse_known_args()
+    return (args,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ## LLM Comparison
 
     Run the same reviews through **two Ollama models** side by side.
     Mark each classification correct ✓ or incorrect ✗ to build a live accuracy dashboard.
@@ -129,35 +162,24 @@ def _():
 
 
 @app.cell
-def _():
+def _(args, mo):
     base_url_input = mo.ui.text(
-        value="http://localhost:11434/v1",
+        value=args.base_url,
         label="Ollama base URL",
         full_width=True,
     )
     model_a_input = mo.ui.text(
-        value="gemma3:1b",
+        value=args.model_a,
         label="Model A",
         placeholder="e.g. gemma3:1b",
     )
     model_b_input = mo.ui.text(
-        value="qwen2.5:0.5b",
+        value=args.model_b,
         label="Model B",
         placeholder="e.g. qwen2.5:0.5b",
     )
     reviews_input = mo.ui.text_area(
-        value="\n".join([
-            "Absolutely love this product! Fast shipping and works perfectly.",
-            "Terrible experience. Broke after two days and support was unhelpful.",
-            "It's okay. Does what it says but nothing special.",
-            "Exceeded my expectations. Highly recommend to anyone looking for quality.",
-            "Packaging was damaged, product inside seemed fine but I'm not happy.",
-            "Great value for money. Using it daily for three months with no issues.",
-            "Instructions were confusing and setup took way too long.",
-            "Customer service responded quickly and resolved my issue same day.",
-            "Average product. Works but feels a bit cheap.",
-            "Would not buy again. Stopped working after a week.",
-        ]),
+        value="\n".join(sample_reviews()),
         label="Reviews to classify (one per line — edit, add or replace)",
         full_width=True,
         rows=10,
@@ -173,26 +195,37 @@ def _():
 
 
 @app.cell
-def _(base_url_input, model_a_input, model_b_input, reviews_input, run_btn):
+def _(
+    args,
+    base_url_input,
+    compare_two_models,
+    get_client,
+    mo,
+    model_a_input,
+    model_b_input,
+    reviews_input,
+    run_btn,
+):
     mo.stop(
         not run_btn.value,
-        mo.md("_Fill in both models and click **Classify with both models** to start._"),
+        mo.md("_Click **Classify with both models** to start._"),
     )
     _texts = [r.strip() for r in reviews_input.value.splitlines() if r.strip()]
     mo.stop(not _texts, mo.md("_No reviews to classify._"))
-    mo.stop(not model_a_input.value.strip(), mo.md("_Enter Model A._"))
-    mo.stop(not model_b_input.value.strip(), mo.md("_Enter Model B._"))
 
     _client = get_client(base_url=base_url_input.value)
-    _df_a = classify_batch(_client, _texts, model=model_a_input.value.strip())
-    _df_b = classify_batch(_client, _texts, model=model_b_input.value.strip())
-    results_df = pd.concat([_df_a, _df_b], ignore_index=True)
+    results_df = compare_two_models(
+        _client,
+        _texts,
+        model_a_input.value.strip(),
+        model_b_input.value.strip(),
+    )
     results_df
     return (results_df,)
 
 
 @app.cell(hide_code=True)
-def _():
+def _(mo):
     mo.md("""
     ### Mark each classification correct or incorrect
     """)
@@ -200,7 +233,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(model_a_input, model_b_input, results_df):
+def _(mo, model_a_input, model_b_input, results_df):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _df_a = results_df[results_df["model"] == _model_a].reset_index(drop=True)
@@ -244,7 +277,7 @@ def _(model_a_input, model_b_input, results_df):
 
 
 @app.cell(hide_code=True)
-def _():
+def _(mo):
     mo.md("""
     ### Accuracy Dashboard
     """)
@@ -252,7 +285,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
+def _(mo, model_a_input, model_b_input, verdicts_a, verdicts_b):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _n = len(verdicts_a.value)
@@ -271,7 +304,7 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
 
 
 @app.cell(hide_code=True)
-def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
+def _(alt, mo, model_a_input, model_b_input, pd, verdicts_a, verdicts_b):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _n = len(verdicts_a.value)
@@ -309,5 +342,69 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     return
 
 
+@app.cell
+def _():
+    return
+
+
+def _run_headless(argv):
+    """Headless CLI entry point: parse args, run both models, write CSV."""
+    import argparse as _argparse
+    import json as _json
+    import os as _os
+
+    import pandas as _pd
+    from openai import OpenAI as _OpenAI
+
+    _SYSTEM_PROMPT = (
+        "You are a sentiment classifier. "
+        "Classify the sentiment of the product review given by the user. "
+        'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", '
+        '"confidence": <0.0-1.0>, "reason": "<one sentence>"}'
+    )
+
+    parser = _argparse.ArgumentParser(description="Compare two Ollama models on a set of reviews.")
+    parser.add_argument("--model-a", default="gemma3:1b")
+    parser.add_argument("--model-b", default="qwen2.5:0.5b")
+    parser.add_argument("--base-url", default="http://localhost:11434/v1")
+    parser.add_argument("--output", required=True, help="CSV path for results")
+    cli = parser.parse_args(argv)
+
+    client = _OpenAI(base_url=cli.base_url, api_key=_os.getenv("OPENAI_API_KEY", "ollama"))
+    texts = sample_reviews()
+    rows = []
+    for text in texts:
+        for model in (cli.model_a, cli.model_b):
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": _SYSTEM_PROMPT},
+                        {"role": "user", "content": text},
+                    ],
+                    temperature=0.0,
+                )
+                raw = (response.choices[0].message.content or "").strip()
+                raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+                parsed = _json.loads(raw)
+                rows.append({
+                    "text": text, "model": model,
+                    "label": parsed.get("label", "neutral"),
+                    "confidence": round(float(parsed.get("confidence", 0.5)), 3),
+                    "reason": parsed.get("reason", ""),
+                })
+            except Exception as exc:
+                rows.append({"text": text, "model": model, "label": "error", "confidence": 0.0, "reason": str(exc)})
+
+    df = _pd.DataFrame(rows)
+    df.to_csv(cli.output, index=False)
+    print(f"Wrote {len(df)} rows to {cli.output}")
+
+
 if __name__ == "__main__":
-    app.run()
+    import sys
+    if "--" in sys.argv:
+        sep = sys.argv.index("--")
+        _run_headless(sys.argv[sep + 1:])
+    else:
+        app.run()

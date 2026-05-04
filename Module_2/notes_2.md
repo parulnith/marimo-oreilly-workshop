@@ -105,6 +105,26 @@ https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo
 Teaching point: marimo keeps the notebook workflow, but the file still behaves
 like normal Python for editors, diffs, reviews, and project tooling.
 
+#### Cloud workflow: molab
+
+The same `.py` file that runs locally and in VS Code also runs in the browser —
+no install, no environment setup. **molab** is marimo's hosted workspace at
+[molab.marimo.io](https://molab.marimo.io). Because notebooks carry their own
+inline dependencies, molab can pick up a notebook from GitHub and run it in a
+sandbox with the exact same packages as your laptop.
+
+Open any notebook from a public GitHub repo with a URL of this shape:
+
+```text
+https://molab.marimo.io/github/<user>/<repo>/blob/main/<path-to-notebook>.py
+```
+
+This is the sharing story for reviewable experiments: one URL, no setup, the
+same sandboxed environment a reviewer or collaborator would get if they cloned
+your repo and ran `marimo edit --sandbox` themselves.
+
+Teaching point: the same notebook behaves identically across local CLI, VS Code,
+and the cloud — that's what makes the experiment portable and reviewable.
 
 ---
 
