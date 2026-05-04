@@ -1,2 +1,0 @@
-pytorch thingy
-skills
