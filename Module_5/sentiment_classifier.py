@@ -36,6 +36,11 @@ def _():
 
 
     Prerequisites: start `Ollama` with `ollama serve`, then pull both models — `ollama pull gemma3:1b` and `ollama pull qwen2.5:0.5b`.
+
+    > **Note:** the imports and `SYSTEM_PROMPT` live in a special **setup cell** at
+    > the top of this file. That makes them visible to top-level `@app.function`s
+    > like `get_client` and `compare_two_models`, which is what lets *other files
+    > import* those helpers — see `eval_pipeline.py`, `eval_script.py`, `test_classifier.py`.
     """)
     return
 

@@ -28,29 +28,57 @@ This module shows you how to move beyond private experimentation and create some
 
 ## Setup
 
-### Easiest: run in the browser, no install
+marimo can be used **online** through [molab](https://molab.marimo.io), marimo's free cloud-hosted notebook service, or **locally** through the open-source package. molab is the easiest way to follow along — local setup is for those who want to keep working after the workshop.
 
-Open [molab.marimo.io](https://molab.marimo.io) — you can run marimo notebooks straight from your browser. To start a fresh notebook, [marimo.new](https://marimo.new) opens one in a single click.
+### Online: molab (no install)
+
+[molab](https://molab.marimo.io/notebooks) is marimo's free cloud-hosted notebook service. It runs entirely in your browser — no Python install, no command line. If you've used Google Colab, the experience is similar.
+
+- **Start fresh:** [marimo.new](https://marimo.new) opens a blank notebook in one click.
+- **Preview workshop notebooks from GitHub:** visit [molab.marimo.io/github](https://molab.marimo.io/github) and paste a notebook URL. The preview stays in sync as the notebook changes, and you can fork it into your own workspace.
+- **Sharing & export:** molab notebooks are public-by-URL but not discoverable. You can download them as `.py`, `.ipynb`, or PDF.
 
 ### Local setup
 
-Clone the repo:
+Clone the repo first:
 
 ```bash
 git clone <repository-url>
 cd "Marimo Workshop"
 ```
 
-Then pick **one** of the install paths below.
+#### Recommended: uv
 
-#### Option 1: pip (standard Python)
+Install [uv](https://docs.astral.sh/uv/), then install Python:
+
+```bash
+uv python install 3.13 --default
+```
+
+Run marimo via `uvx` — no virtual environment needed, marimo runs in an isolated environment automatically:
+
+```bash
+uvx marimo edit --sandbox Module_1/1_2_marimo_reactive_workflow.py
+```
+
+Or open the directory browser:
+
+```bash
+uvx marimo edit --sandbox
+```
+
+The `--sandbox` flag tells marimo to use the dependencies declared inside each notebook's `# /// script` header, so you don't need to install anything else. This is the cleanest path and is what we use in Module 2.
+
+#### Alternative: pip + virtual environment
+
+If you prefer a traditional setup:
 
 **Mac / Linux**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install marimo matplotlib pandas polars
+pip install marimo matplotlib pandas polars
 ```
 
 **Windows PowerShell**
@@ -58,35 +86,19 @@ python -m pip install marimo matplotlib pandas polars
 ```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
-py -m pip install marimo matplotlib pandas polars
+pip install marimo matplotlib pandas polars
 ```
 
-#### Option 2: uv (faster, recommended)
+#### VS Code / Cursor
 
-[uv](https://docs.astral.sh/uv/) handles the virtual environment for you.
-
-**Mac / Linux**
-
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install marimo matplotlib pandas polars
-```
-
-**Windows PowerShell**
-
-```powershell
-uv venv
-.venv\Scripts\Activate.ps1
-uv pip install marimo matplotlib pandas polars
-```
+Prefer to stay in your editor? Install the [marimo extension](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo) — works in both VS Code and Cursor.
 
 ### First run: the official intro
 
 Before opening the workshop files, take 5 minutes with marimo's built-in tutorial:
 
 ```bash
-marimo tutorial intro
+uvx marimo tutorial intro     # or: marimo tutorial intro
 ```
 
 ## How to Run the Notebooks

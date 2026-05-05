@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.23.4"
+__generated_with = "0.23.5"
 app = marimo.App(width="medium")
 
 
@@ -94,18 +94,6 @@ def _():
     """
     df = pd.read_csv(StringIO(csv_data), delim_whitespace=True)
     print(df)
-    return
-
-
-@app.cell
-def _():
-    a = 10
-    return
-
-
-@app.cell
-def _():
-    b = 20
     return
 
 
