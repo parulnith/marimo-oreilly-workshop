@@ -161,6 +161,10 @@ skrub
 summary.md
 add_stuff.md
 
+# Private workshop notes (instructor cue sheets — deleted before public release)
+notes_*.md
+**/notes_*.md
+
 # Generated outputs / scratch
 results.csv
 *.log
