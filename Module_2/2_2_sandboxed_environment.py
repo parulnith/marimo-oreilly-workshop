@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.23.5"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
@@ -32,8 +32,10 @@ def _(mo):
 @app.cell
 def _():
     import marimo as mo
+    import sys
+    import sklearn
 
-    return (mo,)
+    return mo, sklearn, sys
 
 
 @app.cell(hide_code=True)
@@ -45,9 +47,8 @@ def _(mo):
 
 
 @app.cell
-def _():
-    import sys
-    import sklearn
+def _(sklearn, sys):
+
     from sklearn.calibration import CalibratedClassifierCV
     from sklearn.datasets import make_classification
     from sklearn.model_selection import train_test_split

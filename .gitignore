@@ -110,6 +110,7 @@ venv.bak/
 env_old/
 venv_old/
 Module_2/env_py310_pandas153/
+*.virtual_
 
 # Editor settings
 .vscode/

@@ -7,16 +7,10 @@ app = marimo.App()
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    # Tiny Code Change, Small marimo Diff
+    # Small code change, small diff
 
-    Change `power = 3` to `power = 4`, save the file, then run:
-
-    ```bash
-    git diff Module_2/2_3_marimo_diff_demo.py
-    ```
-
-    The diff stays focused on the code because marimo notebooks are plain Python
-    files and do not store rendered outputs.
+    marimo notebooks are plain Python files — no JSON, no embedded outputs.
+    `git diff` shows only the lines you actually changed.
     """)
     return
 
@@ -28,6 +22,20 @@ def _():
     import numpy as np
 
     return mo, np, plt
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    **Try it:** change `power = 3` to `power = 4`, save the file, then run:
+
+    ```bash
+    git diff Module_2/2_3_marimo_diff_demo.py
+    ```
+
+    You'll see one line in the diff.
+    """)
+    return
 
 
 @app.cell
