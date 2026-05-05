@@ -5,49 +5,8 @@
 
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.5"
 app = marimo.App(width="medium")
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md("""
-    # Module 5: From Interactive Work to Reusable Systems
-
-    ## What this notebook does
-
-    This is a small **LLM evaluation harness** built around a single task:
-    classify the sentiment of a **product review** as `positive`, `negative`, or
-    `neutral`, with a confidence score and a one-sentence reason.
-
-    It runs the same set of reviews through **two local Ollama models** (default:
-    `gemma3:1b` vs. `qwen2.5:0.5b`) so you can compare their behaviour
-    side by side, not just whether they agree on the label, but how confident
-    each one is and how it justifies the call.
-
-
-    ## How the eval works
-
-    For every review, each model returns structured JSON: a label, a confidence
-    in [0, 1], and a short reason. You then mark each prediction ✓ or ✗ in the
-    UI. The notebook aggregates those judgements into a live accuracy dashboard
-    so the eval is **human-in-the-loop**, not an automated metric. 
-
-    ## Same file, four modes
-
-    The same `.py` file runs as an interactive notebook, a clean web app, a
-    headless CLI script, and an importable Python module — that's the Module 5
-    point.
-
-    | Mode | Command |
-    |------|---------|
-    | Interactive notebook | `marimo edit sentiment_classifier.py` |
-    | Clean web app | `marimo run sentiment_classifier.py` |
-    | Headless script | `uv run sentiment_classifier.py -- --model-a gemma3:1b --model-b qwen2.5:0.5b --output results.csv` |
-    | Importable module | `from sentiment_classifier import get_client, compare_two_models` |
-    """)
-    return (mo,)
-
 
 with app.setup:
     import argparse
@@ -67,9 +26,45 @@ with app.setup:
     )
 
 
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    # Sentiment Classifier
+
+    A small LLM eval harness to classify product reviews with two Ollama models, side by side.
+
+
+    Prerequisites: start `Ollama` with `ollama serve`, then pull both models — `ollama pull gemma3:1b` and `ollama pull qwen2.5:0.5b`.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ### Connect to Ollama
+
+    Builds an OpenAI client that talks to a local Ollama server. Ollama mimics the OpenAI API, so the same client library works for both and the api_key is just a placeholder.
+    """)
+    return
+
+
 @app.function
 def get_client(base_url="http://localhost:11434/v1", api_key="ollama"):
     return OpenAI(base_url=base_url, api_key=api_key or os.getenv("OPENAI_API_KEY", "ollama"))
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
+    ### Run both models and return a DataFrame
+
+    For each review, calls both models with `SYSTEM_PROMPT`, parses the JSON
+    response, and collects rows into a DataFrame. Errors become rows with
+    `label="error"` so one bad call doesn't kill the whole run.
+    """)
+    return
 
 
 @app.function
@@ -124,7 +119,7 @@ def sample_reviews():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
     ## CLI arguments
 
@@ -136,7 +131,7 @@ def _(mo):
 
 
 @app.cell
-def _(argparse):
+def _():
     parser = argparse.ArgumentParser(
         description="Compare two Ollama models on a set of reviews.",
     )
@@ -149,7 +144,7 @@ def _(argparse):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
     ## LLM Comparison
 
@@ -162,7 +157,7 @@ def _(mo):
 
 
 @app.cell
-def _(args, mo):
+def _(args):
     base_url_input = mo.ui.text(
         value=args.base_url,
         label="Ollama base URL",
@@ -195,17 +190,7 @@ def _(args, mo):
 
 
 @app.cell
-def _(
-    args,
-    base_url_input,
-    compare_two_models,
-    get_client,
-    mo,
-    model_a_input,
-    model_b_input,
-    reviews_input,
-    run_btn,
-):
+def _(base_url_input, model_a_input, model_b_input, reviews_input, run_btn):
     mo.stop(
         not run_btn.value,
         mo.md("_Click **Classify with both models** to start._"),
@@ -225,7 +210,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
     ### Mark each classification correct or incorrect
     """)
@@ -233,7 +218,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo, model_a_input, model_b_input, results_df):
+def _(model_a_input, model_b_input, results_df):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _df_a = results_df[results_df["model"] == _model_a].reset_index(drop=True)
@@ -277,7 +262,7 @@ def _(mo, model_a_input, model_b_input, results_df):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md("""
     ### Accuracy Dashboard
     """)
@@ -285,7 +270,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo, model_a_input, model_b_input, verdicts_a, verdicts_b):
+def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _n = len(verdicts_a.value)
@@ -304,7 +289,7 @@ def _(mo, model_a_input, model_b_input, verdicts_a, verdicts_b):
 
 
 @app.cell(hide_code=True)
-def _(alt, mo, model_a_input, model_b_input, pd, verdicts_a, verdicts_b):
+def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _n = len(verdicts_a.value)
@@ -342,63 +327,23 @@ def _(alt, mo, model_a_input, model_b_input, pd, verdicts_a, verdicts_b):
     return
 
 
-@app.cell
-def _():
-    return
-
-
 def _run_headless(argv):
-    """Headless CLI entry point: parse args, run both models, write CSV."""
-    import argparse as _argparse
-    import json as _json
-    import os as _os
-
-    import pandas as _pd
-    from openai import OpenAI as _OpenAI
-
-    _SYSTEM_PROMPT = (
-        "You are a sentiment classifier. "
-        "Classify the sentiment of the product review given by the user. "
-        'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", '
-        '"confidence": <0.0-1.0>, "reason": "<one sentence>"}'
-    )
-
-    parser = _argparse.ArgumentParser(description="Compare two Ollama models on a set of reviews.")
+    """Headless CLI: parse args, run both models, optionally write CSV."""
+    parser = argparse.ArgumentParser(description="Compare two Ollama models on a set of reviews.")
     parser.add_argument("--model-a", default="gemma3:1b")
     parser.add_argument("--model-b", default="qwen2.5:0.5b")
     parser.add_argument("--base-url", default="http://localhost:11434/v1")
-    parser.add_argument("--output", required=True, help="CSV path for results")
+    parser.add_argument("--output", default=None, help="Optional CSV path for results")
     cli = parser.parse_args(argv)
 
-    client = _OpenAI(base_url=cli.base_url, api_key=_os.getenv("OPENAI_API_KEY", "ollama"))
-    texts = sample_reviews()
-    rows = []
-    for text in texts:
-        for model in (cli.model_a, cli.model_b):
-            try:
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": _SYSTEM_PROMPT},
-                        {"role": "user", "content": text},
-                    ],
-                    temperature=0.0,
-                )
-                raw = (response.choices[0].message.content or "").strip()
-                raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-                parsed = _json.loads(raw)
-                rows.append({
-                    "text": text, "model": model,
-                    "label": parsed.get("label", "neutral"),
-                    "confidence": round(float(parsed.get("confidence", 0.5)), 3),
-                    "reason": parsed.get("reason", ""),
-                })
-            except Exception as exc:
-                rows.append({"text": text, "model": model, "label": "error", "confidence": 0.0, "reason": str(exc)})
+    client = get_client(base_url=cli.base_url)
+    df = compare_two_models(client, sample_reviews(), cli.model_a, cli.model_b)
 
-    df = _pd.DataFrame(rows)
-    df.to_csv(cli.output, index=False)
-    print(f"Wrote {len(df)} rows to {cli.output}")
+    if cli.output:
+        df.to_csv(cli.output, index=False)
+        print(f"Wrote {len(df)} rows to {cli.output}")
+    else:
+        print(df[["model", "text", "label", "confidence"]].to_string(index=False))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 
 *Sponsored by [marimo](https://marimo.io/)*
 
-![Workshop banner](1775595001973.jpeg)
+![Workshop banner](course_img.jpeg)
 
 Workshop materials for the O'Reilly Live course **[marimo for AI and ML Development](https://learning.oreilly.com/live-events/marimo-for-ai-and-ml-development/0642572355555/)**.
 
@@ -25,8 +25,6 @@ AI coding agents work best when they're integrated into your environment from th
 
 ### [Module 5: From Interactive Work to Reusable Systems](Module_5/)
 This module shows you how to move beyond private experimentation and create something that others can easily run, inspect and build upon.
-
-Each module has a `notes_*.md` file with the talking points for that section.
 
 ## How to Use This Repo
 

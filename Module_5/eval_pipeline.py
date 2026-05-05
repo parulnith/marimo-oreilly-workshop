@@ -4,13 +4,6 @@
 # ///
 
 """Reuse the notebook's helpers from a marimo notebook OR a plain script.
-
-Same file, two ways to run:
-
-    uv run eval_pipeline.py              # runs as a script, prints results
-    marimo edit eval_pipeline.py         # opens as a marimo notebook
-
-That is the Module 5 point: a marimo file is just a Python file.
 """
 
 import marimo
@@ -18,25 +11,29 @@ import marimo
 __generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
-with app.setup:
-    import marimo as mo
-
-    from sentiment_classifier import compare_two_models, get_client
-
 
 @app.cell(hide_code=True)
-def _():
+def _(mo):
     mo.md("""
-    # Eval pipeline
+    # Eval Pipeline (notebook)
 
-    This notebook imports `compare_two_models` and `get_client` from
-    `sentiment_classifier.py` and uses them on a small set of reviews.
+    A marimo notebook that imports `compare_two_models` and `get_client` from
+    `sentiment_classifier.py` and runs them on three reviews.
     """)
     return
 
 
 @app.cell
 def _():
+    import marimo as mo
+
+    from sentiment_classifier import compare_two_models, get_client
+
+    return compare_two_models, get_client, mo
+
+
+@app.cell
+def _(get_client):
     client = get_client()
     return (client,)
 
@@ -52,17 +49,15 @@ def _():
 
 
 @app.cell
-def _(client, texts):
-    results = compare_two_models(
-        client, texts, model_a="gemma3:1b", model_b="qwen2.5:0.5b"
-    )
-    #print(results[["model", "text", "label", "confidence"]].to_string(index=False))
+def _(client, compare_two_models, texts):
+    results = compare_two_models(client, texts, model_a="gemma3:1b", model_b="qwen2.5:0.5b")
+    # print(results[["model", "text", "label", "confidence"]].to_string(index=False))
     results
     return (results,)
 
 
 @app.cell
-def _(results):
+def _(mo, results):
     _errors = (results["label"] == "error").sum()
     _avg_conf = results.loc[results["label"] != "error", "confidence"].mean()
     print(f"\nTotal rows : {len(results)}")

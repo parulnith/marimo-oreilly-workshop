@@ -1,3 +1,13 @@
+"""Eval pipeline (plain script).
+
+Same job as eval_pipeline.py, but with just a Python
+script that imports helpers from sentiment_classifier.py and prints results.
+
+The point: notebook helpers are just regular Python functions.
+
+Run:  python eval_script.py
+"""
+
 from sentiment_classifier import compare_two_models, get_client
 
 client = get_client(base_url="http://localhost:11434/v1")

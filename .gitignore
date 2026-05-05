@@ -167,3 +167,4 @@ results.csv
 **/layouts/
 # CI / GitHub
 .github/
+.notes/
