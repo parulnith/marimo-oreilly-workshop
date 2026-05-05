@@ -165,6 +165,13 @@ add_stuff.md
 notes_*.md
 **/notes_*.md
 
+# Private workshop booklets
+booklet*.md
+**/booklet*.md
+
+# Generated CSVs from CLI runs
+**/results.csv
+
 # Generated outputs / scratch
 results.csv
 *.log

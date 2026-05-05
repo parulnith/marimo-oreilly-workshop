@@ -26,7 +26,13 @@ AI coding agents work best when they're integrated into your environment from th
 ### [Module 5: From Interactive Work to Reusable Systems](Module_5/)
 This module shows you how to move beyond private experimentation and create something that others can easily run, inspect and build upon.
 
-## How to Use This Repo
+## Setup
+
+### Easiest: run in the browser, no install
+
+Open [molab.marimo.io](https://molab.marimo.io) — you can run marimo notebooks straight from your browser. To start a fresh notebook, [marimo.new](https://marimo.new) opens one in a single click.
+
+### Local setup
 
 Clone the repo:
 
@@ -35,28 +41,69 @@ git clone <repository-url>
 cd "Marimo Workshop"
 ```
 
-### Option 1: Using pip (standard Python)
+Then pick **one** of the install paths below.
+
+#### Option 1: pip (standard Python)
+
+**Mac / Linux**
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate     # on Windows: .venv\Scripts\activate
-pip install marimo
-marimo edit Module_1/1_2_marimo_reactive_workflow.py
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install marimo matplotlib pandas polars
 ```
 
-Or launch the directory browser:
+**Windows PowerShell**
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+py -m pip install marimo matplotlib pandas polars
+```
+
+#### Option 2: uv (faster, recommended)
+
+[uv](https://docs.astral.sh/uv/) handles the virtual environment for you.
+
+**Mac / Linux**
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install marimo matplotlib pandas polars
+```
+
+**Windows PowerShell**
+
+```powershell
+uv venv
+.venv\Scripts\Activate.ps1
+uv pip install marimo matplotlib pandas polars
+```
+
+### First run: the official intro
+
+Before opening the workshop files, take 5 minutes with marimo's built-in tutorial:
+
+```bash
+marimo tutorial intro
+```
+
+## How to Run the Notebooks
+
+marimo files are plain Python (`.py`), and the *same file* can run in four modes:
+
+| Mode | Command | When to use |
+|------|---------|-------------|
+| Edit | `marimo edit Module_1/1_2_marimo_reactive_workflow.py` | The full editor — write and explore |
+| App | `marimo run Module_1/1_3_marimo_ui_elements.py` | Run with code hidden, UI only |
+| Script | `python Module_1/1_2_marimo_reactive_workflow.py` | Run as plain Python, no notebook |
+| Sandbox | `marimo edit --sandbox Module_1/1_2_marimo_reactive_workflow.py` | Isolated env per notebook (Module 2) |
+
+Or open the directory browser:
 
 ```bash
 marimo edit .
-```
-
-### Option 2: Using uv (recommended)
-
-[uv](https://docs.astral.sh/uv/) is faster and handles environments automatically:
-
-```bash
-uv sync
-uv run marimo edit Module_1/1_2_marimo_reactive_workflow.py
 ```
 
 The modules are progressive — start with Module 1 and work through them in order. Jupyter notebooks (`.ipynb`) in Modules 1 and 2 are intentionally included as the "before" baseline; the marimo `.py` files alongside them are the "after."

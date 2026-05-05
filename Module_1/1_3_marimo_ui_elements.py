@@ -1,16 +1,23 @@
 import marimo
 
-__generated_with = "0.20.4"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
 @app.cell
 def _(mo):
     mo.md("""
-    # Marimo Reactive UI Elements Demo
+    # marimo UI Elements
 
-    Explore marimo's built-in UI elements. Every widget is **reactive** —
-    change a value and dependent cells update instantly, no callbacks needed.
+    marimo ships with a built-in UI component library — sliders, dropdowns,
+    tables, forms, selectable plots so you can explore **what-if questions**
+    about your data and models without writing any callbacks.
+
+    Every widget is **reactive**: change a value and dependent cells update
+    instantly. Custom widgets work too via the [AnyWidget](https://anywidget.dev)
+    standard, so domain-specific UIs slot in cleanly.
+
+    The cells below tour the most common elements.
     """)
     return
 
@@ -147,7 +154,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    run_btn = mo.ui.run_button(label="Run Analysis", kind="primary")
+    run_btn = mo.ui.run_button(label="Run Analysis", kind="neutral")
     run_btn
     return (run_btn,)
 
@@ -181,7 +188,9 @@ def _(mo, pl):
 
 @app.cell
 def _(mo, table_input):
-    mo.md(f"**{len(table_input.value)} row(s) selected**")
+    mo.md(f"""
+    **{len(table_input.value)} row(s) selected**
+    """)
     return
 
 
@@ -278,6 +287,40 @@ def _(mo):
         """),
     })
     summary_tabs
+    return
+
+
+@app.cell
+def _():
+    a = 1
+    return (a,)
+
+
+@app.cell
+def _():
+    b = 2
+    return (b,)
+
+
+@app.cell
+def _(a, b):
+    c = a+b
+    return (c,)
+
+
+@app.cell
+def _(c):
+    c
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
     return
 
 

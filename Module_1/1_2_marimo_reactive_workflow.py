@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.23.3"
+__generated_with = "0.23.5"
 app = marimo.App(width="medium")
 
 
@@ -49,7 +49,6 @@ def _():
     rate = 0.07
     years = 20
     growth = compound_interest(principal, rate, years)
-
     return growth, principal, rate, years
 
 
@@ -96,7 +95,7 @@ def _():
 
 
 @app.cell
-def _(pd, principal, rates, years):
+def _(mo, pd, principal, rates, years):
     rows = []
     for comparison_rate in rates:
         scenario_growth = compound_interest(principal, comparison_rate, years)
@@ -108,7 +107,7 @@ def _(pd, principal, rates, years):
             }
         )
     summary_df = pd.DataFrame(rows)
-    summary_df
+    mo.plain(summary_df)
     return
 
 
@@ -120,13 +119,29 @@ def _():
 
 @app.cell
 def _():
-    b = 2
+    b = 12
     return (b,)
 
 
 @app.cell
 def _(a, b):
     a+b
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ---
+
+    ### Coming from Jupyter?
+
+    You don't have to start from scratch. Convert any `.ipynb` to a marimo notebook with one command:
+
+    ```bash
+    marimo convert notebook.ipynb -o notebook.py
+    ```
+    """)
     return
 
 
