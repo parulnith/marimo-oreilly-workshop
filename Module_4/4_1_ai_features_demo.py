@@ -3,20 +3,24 @@
 # dependencies = [
 #     "marimo",
 #     "matplotlib==3.10.8",
+#     "mcp>=1",
+#     "nbformat==5.10.4",
 #     "pandas==2.3.3",
+#     "pydantic>=2",
+#     "ruff==0.15.12",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.23.3"
+__generated_with = "0.23.5"
 app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    # Module 4: AI features demo
+    # AI features in marimo
     """)
     return
 
@@ -38,15 +42,9 @@ def _(mo):
     Before using the AI features, configure an LLM provider in marimo settings:
 
     1. Open notebook settings.
-    2. Install the required AI dependencies.
+    2. If marimo prompts you to install AI packages, accept the prompt.
     3. Open the **AI** tab.
     4. Choose a hosted provider or a local Ollama model.
-
-    To find the configuration file from a terminal:
-
-    ```bash
-    marimo config show | head
-    ```
     """)
     return
 
@@ -70,9 +68,7 @@ def _(mo):
     mo.md("""
     ## Demo data
 
-    The examples below use a small dataframe named `df`. It is simple enough
-    for live generation but still has useful variables for context-aware
-    prompts.
+    The examples below use a small dataframe named `df`.
     """)
     return
 
@@ -81,16 +77,96 @@ def _(mo):
 def _(pd):
     df = pd.DataFrame(
         [
-            {"region": "North", "segment": "Enterprise", "channel": "Direct", "revenue": 82000, "cost": 42000, "satisfaction": 8.7, "converted": True},
-            {"region": "North", "segment": "SMB", "channel": "Partner", "revenue": 38000, "cost": 21000, "satisfaction": 7.8, "converted": True},
-            {"region": "South", "segment": "Enterprise", "channel": "Direct", "revenue": 76000, "cost": 39000, "satisfaction": 8.1, "converted": True},
-            {"region": "South", "segment": "SMB", "channel": "Online", "revenue": 29000, "cost": 18000, "satisfaction": 6.9, "converted": False},
-            {"region": "East", "segment": "Midmarket", "channel": "Partner", "revenue": 54000, "cost": 31000, "satisfaction": 7.4, "converted": True},
-            {"region": "East", "segment": "SMB", "channel": "Online", "revenue": 24000, "cost": 15000, "satisfaction": 6.5, "converted": False},
-            {"region": "West", "segment": "Enterprise", "channel": "Direct", "revenue": 91000, "cost": 47000, "satisfaction": 9.0, "converted": True},
-            {"region": "West", "segment": "Midmarket", "channel": "Partner", "revenue": 61000, "cost": 33000, "satisfaction": 8.0, "converted": True},
-            {"region": "Central", "segment": "SMB", "channel": "Online", "revenue": 31000, "cost": 19000, "satisfaction": 7.1, "converted": False},
-            {"region": "Central", "segment": "Midmarket", "channel": "Direct", "revenue": 59000, "cost": 32000, "satisfaction": 7.9, "converted": True},
+            {
+                "region": "North",
+                "segment": "Enterprise",
+                "channel": "Direct",
+                "revenue": 82000,
+                "cost": 42000,
+                "satisfaction": 8.7,
+                "converted": True,
+            },
+            {
+                "region": "North",
+                "segment": "SMB",
+                "channel": "Partner",
+                "revenue": 38000,
+                "cost": 21000,
+                "satisfaction": 7.8,
+                "converted": True,
+            },
+            {
+                "region": "South",
+                "segment": "Enterprise",
+                "channel": "Direct",
+                "revenue": 76000,
+                "cost": 39000,
+                "satisfaction": 8.1,
+                "converted": True,
+            },
+            {
+                "region": "South",
+                "segment": "SMB",
+                "channel": "Online",
+                "revenue": 29000,
+                "cost": 18000,
+                "satisfaction": 6.9,
+                "converted": False,
+            },
+            {
+                "region": "East",
+                "segment": "Midmarket",
+                "channel": "Partner",
+                "revenue": 54000,
+                "cost": 31000,
+                "satisfaction": 7.4,
+                "converted": True,
+            },
+            {
+                "region": "East",
+                "segment": "SMB",
+                "channel": "Online",
+                "revenue": 24000,
+                "cost": 15000,
+                "satisfaction": 6.5,
+                "converted": False,
+            },
+            {
+                "region": "West",
+                "segment": "Enterprise",
+                "channel": "Direct",
+                "revenue": 91000,
+                "cost": 47000,
+                "satisfaction": 9.0,
+                "converted": True,
+            },
+            {
+                "region": "West",
+                "segment": "Midmarket",
+                "channel": "Partner",
+                "revenue": 61000,
+                "cost": 33000,
+                "satisfaction": 8.0,
+                "converted": True,
+            },
+            {
+                "region": "Central",
+                "segment": "SMB",
+                "channel": "Online",
+                "revenue": 31000,
+                "cost": 19000,
+                "satisfaction": 7.1,
+                "converted": False,
+            },
+            {
+                "region": "Central",
+                "segment": "Midmarket",
+                "channel": "Direct",
+                "revenue": 59000,
+                "cost": 32000,
+                "satisfaction": 7.9,
+                "converted": True,
+            },
         ]
     )
     df["profit"] = df["revenue"] - df["cost"]
@@ -118,18 +194,12 @@ def _(mo):
 def _(mo):
     mo.md("""
     ## 2. Inline autocompletion
-
-    Click into the next cell and start typing the seed from the Module 4 notes.
-    Let inline autocomplete finish the helper function, then review the code
-    before running it.
     """)
     return
 
 
 @app.cell
 def _():
-    autocomplete_workspace = "Use this cell for the inline autocomplete demo."
-    autocomplete_workspace
     return
 
 
@@ -138,8 +208,7 @@ def _(mo):
     mo.md("""
     ## 3. Refactor the current cell
 
-    Click into the next code cell, press `Ctrl/Cmd-Shift-E`, and use the
-    refactor prompt from the Module 4 notes.
+    Use AI refactor on the next repetitive code cell.
     """)
     return
 
@@ -216,7 +285,7 @@ def _(metric_summary, plt, selected_metric):
     ax.set_title(f"Average {selected_metric} by segment")
     ax.set_xlabel("Segment")
     ax.set_ylabel(selected_metric)
-    fig
+    plt.gca()
     return
 
 
@@ -225,8 +294,7 @@ def _(mo):
     mo.md("""
     ## 5. Generate an entire notebook
 
-    Use the command-line prompt from the Module 4 notes. This step happens in
-    the terminal, not inside this notebook.
+    This step happens in the terminal with `marimo new`.
     """)
     return
 
@@ -234,10 +302,10 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    ## 6. Agent workflows: marimo pair, MCP, and skills
+    ## 6. Local models and agent workflows
 
-    Use this section to introduce the newer agent workflows. The live commands
-    and setup choices live in the Module 4 notes.
+    Use this part of the workshop to compare hosted models, local models, and
+    external coding agents.
     """)
     return
 
@@ -247,8 +315,7 @@ def _(mo):
     mo.md("""
     ## 7. Check the notebook
 
-    After AI edits, run `marimo check` from the terminal. The exact commands
-    are in the Module 4 notes.
+    After AI edits, run `marimo check` from the terminal.
     """)
     return
 

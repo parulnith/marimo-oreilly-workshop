@@ -16,7 +16,7 @@
 
 import marimo
 
-__generated_with = "0.23.4"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
@@ -25,7 +25,7 @@ def _(mo):
     mo.md("""
     # Interactive ML Workflow
 
-    Here, we will see **data, controls, models, and plots** behave as one live
+    This notebook uses the idea for an end-to-end AI workflow. It starts with data inspection, moves into visual exploration, connects those choices to model training, and then uses model errors as the next input for analysis. Here, we will see **data, controls, models, and plots** behave as one live
     system.
     """)
     return
@@ -57,27 +57,33 @@ def _():
     )
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Data
+    We'll walk through one end-to-end AI workflow on the **Adult Income** dataset — a classic tabular benchmark from the US Census where the task is to predict whether a person earns more than $50K per year. It's a binary classification problem with a mix of numeric (age, hours-per-week, capital gains) and categorical (occupation, education, marital status) features.
+
+    Here's the path we'll take:
+
+    1. **Look at the data** — first as a raw dataframe, then as an editable sample.
+    2. **Explore it visually** — drag columns into a chart, then sort and filter a table.
+    3. **Pick features and sample size** — using widgets that drive the rest of the pipeline.
+    4. **Fit and compare two models** — TabICL and Random Forest, side by side.
+    5. **Debug errors interactively** — move a threshold, inspect misclassified rows
+
+    Each stage introduces a marimo widget.
+    """)
+    return
+
+
 @app.cell
 def _(fetch_openml):
-    data = fetch_openml("adult", version=2, as_frame=True)
+    data= fetch_openml("adult", version=2, as_frame=True)
     df = data.frame.copy()
     df["income"] = (df["class"].str.strip() == ">50K").astype(int)
     df = df.drop(columns=["class"]).dropna()
     feature_options = [col for col in df.columns if col != "income"]
     return df, feature_options
-
-
-@app.cell(hide_code=True)
-def _(df, mo):
-    mo.md(f"""
-    ## Data
-
-    The Adult Income dataset has **{len(df):,} rows** and the task is to
-    predict whether someone earns more than $50K per year. Start by
-    looking at the data itself before moving into visual exploration and
-    modeling.
-    """)
-    return
 
 
 @app.cell(hide_code=True)
