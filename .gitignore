@@ -165,6 +165,8 @@ add_stuff.md
 # Private workshop notes (instructor cue sheets — deleted before public release)
 notes_*.md
 **/notes_*.md
+notes_*.pdf
+**/notes_*.pdf
 
 # Private workshop booklets
 booklet*.md
