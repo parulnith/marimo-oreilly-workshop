@@ -4,7 +4,7 @@ __generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     # marimo UI Elements
@@ -30,7 +30,7 @@ def _():
     return mo, pl
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     #### `mo.ui.text` and `mo.ui.text_area`
@@ -46,7 +46,7 @@ def _(mo):
     return text_input, textarea_input
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, text_input, textarea_input):
     mo.md(f"""
     **Text value:** `{text_input.value}`
@@ -56,7 +56,7 @@ def _(mo, text_input, textarea_input):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     #### `mo.ui.number`, `mo.ui.slider`, and `mo.ui.range_slider`
@@ -73,7 +73,7 @@ def _(mo):
     return number_input, range_input, slider_input
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, number_input, range_input, slider_input):
     mo.md(f"""
     **Number:** {number_input.value}
@@ -85,7 +85,7 @@ def _(mo, number_input, range_input, slider_input):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     #### `mo.ui.checkbox`, `mo.ui.radio`, and `mo.ui.dropdown`
@@ -93,7 +93,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     checkbox_input = mo.ui.checkbox(label="Enable feature", value=True)
     radio_input = mo.ui.radio(
@@ -110,7 +110,7 @@ def _(mo):
     return checkbox_input, dropdown_input, radio_input
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(checkbox_input, dropdown_input, mo, radio_input):
     mo.md(f"""
     **Checkbox:** {checkbox_input.value}
@@ -122,7 +122,7 @@ def _(checkbox_input, dropdown_input, mo, radio_input):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     #### `mo.ui.date`
@@ -137,14 +137,14 @@ def _(mo):
     return (date_input,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(date_input, mo):
     date_str = str(date_input.value) if date_input.value else "No date selected"
     mo.md(f"**Selected date:** {date_str}")
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     #### `mo.ui.run_button`
@@ -152,14 +152,14 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     run_btn = mo.ui.run_button(label="Run Analysis", kind="neutral")
     run_btn
     return (run_btn,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, run_btn):
     _msg = "**Analysis complete!** The run button was clicked." if run_btn.value else "_Click the button to trigger an action._"
     mo.md(_msg)
@@ -287,40 +287,6 @@ def _(mo):
         """),
     })
     summary_tabs
-    return
-
-
-@app.cell
-def _():
-    a = 1
-    return (a,)
-
-
-@app.cell
-def _():
-    b = 2
-    return (b,)
-
-
-@app.cell
-def _(a, b):
-    c = a+b
-    return (c,)
-
-
-@app.cell
-def _(c):
-    c
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
     return
 
 

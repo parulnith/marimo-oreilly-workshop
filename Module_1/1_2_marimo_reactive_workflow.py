@@ -113,19 +113,7 @@ def _(mo, pd, principal, rates, years):
 
 @app.cell
 def _():
-    a = 1
-    return (a,)
-
-
-@app.cell
-def _():
-    b = 12
-    return (b,)
-
-
-@app.cell
-def _(a, b):
-    a+b
+    a = 15
     return
 
 

@@ -43,8 +43,8 @@ marimo can be used **online** through [molab](https://molab.marimo.io), marimo's
 Clone the repo first:
 
 ```bash
-git clone <repository-url>
-cd "Marimo Workshop"
+git clone https://github.com/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop.git
+cd marimo-for-ai-and-ml-development-oreilly-workshop
 ```
 
 #### Recommended: uv
