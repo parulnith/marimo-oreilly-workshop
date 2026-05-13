@@ -12,7 +12,6 @@ with app.setup:
     import argparse
     import json
     import os
-
     import altair as alt
     import marimo as mo
     import pandas as pd
@@ -24,7 +23,6 @@ with app.setup:
         'Respond ONLY with valid JSON: {"label": "<positive|negative|neutral>", '
         '"confidence": <0.0-1.0>, "reason": "<one sentence>"}'
     )
-
 
 
 @app.cell(hide_code=True)
@@ -353,6 +351,7 @@ def _run_headless(argv):
 
 if __name__ == "__main__":
     import sys
+
     if "--" in sys.argv:
         sep = sys.argv.index("--")
         _run_headless(sys.argv[sep + 1:])
