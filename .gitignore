@@ -157,6 +157,8 @@ __marimo__/
 
 # Local assistant instructions
 CLAUDE.md
+.agents/
+**/.agents/
 Misc/
 skrub
 summary.md
