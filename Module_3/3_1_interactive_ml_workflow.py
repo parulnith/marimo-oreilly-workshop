@@ -23,6 +23,14 @@ app = marimo.App(width="medium")
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
+    [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop/blob/main/Module_3/3_1_interactive_ml_workflow.py)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
     # Interactive ML Workflow
 
     This notebook uses the idea for an end-to-end AI workflow. It starts with data inspection, moves into visual exploration, connects those choices to model training, and then uses model errors as the next input for analysis. Here, we will see **data, controls, models, and plots** behave as one live

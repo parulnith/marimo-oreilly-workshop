@@ -7,6 +7,14 @@ app = marimo.App()
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
+    [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop/blob/main/Module_2/2_3_marimo_diff_demo.py)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
     # Small code change, small diff
 
     marimo notebooks are plain Python files — no JSON, no embedded outputs.

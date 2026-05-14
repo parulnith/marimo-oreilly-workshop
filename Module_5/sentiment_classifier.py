@@ -28,6 +28,14 @@ with app.setup:
 @app.cell(hide_code=True)
 def _():
     mo.md("""
+    [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/parulnith/marimo-for-ai-and-ml-development-oreilly-workshop/blob/main/Module_5/sentiment_classifier.py)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md("""
     # Sentiment Classifier
 
     A small LLM eval harness to classify product reviews with two Ollama models, side by side.
