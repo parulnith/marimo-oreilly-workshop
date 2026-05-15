@@ -185,3 +185,4 @@ results.csv
 # CI / GitHub
 .github/
 .notes/
+.virtual*
