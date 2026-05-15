@@ -5,7 +5,7 @@
 
 import marimo
 
-__generated_with = "0.23.5"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -46,7 +46,7 @@ def _():
     > **Note:** the imports and `SYSTEM_PROMPT` live in a special **setup cell** at
     > the top of this file. That makes them visible to top-level `@app.function`s
     > like `get_client` and `compare_two_models`, which is what lets *other files
-    > import* those helpers — see `eval_pipeline.py`, `eval_script.py`, `test_classifier.py`.
+    > import* those helpers — see `eval_pipeline.py`.
     """)
     return
 
@@ -338,8 +338,9 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     return
 
 
-def _run_headless(argv):
-    """Headless CLI: parse args, run both models, optionally write CSV."""
+@app.function
+def run_headless(argv):
+    """Parse CLI args, run both models, and optionally write CSV output."""
     parser = argparse.ArgumentParser(description="Compare two Ollama models on a set of reviews.")
     parser.add_argument("--model-a", default="gemma3:1b")
     parser.add_argument("--model-b", default="qwen2.5:0.5b")
@@ -362,6 +363,6 @@ if __name__ == "__main__":
 
     if "--" in sys.argv:
         sep = sys.argv.index("--")
-        _run_headless(sys.argv[sep + 1:])
+        run_headless(sys.argv[sep + 1:])
     else:
         app.run()
