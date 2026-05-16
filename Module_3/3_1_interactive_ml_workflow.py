@@ -16,7 +16,7 @@
 
 import marimo
 
-__generated_with = "0.23.3"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 
@@ -86,7 +86,7 @@ def _(mo):
 
 @app.cell
 def _(fetch_openml):
-    data= fetch_openml("adult", version=2, as_frame=True)
+    data = fetch_openml("adult", version=2, as_frame=True)
     df = data.frame.copy()
     df["income"] = (df["class"].str.strip() == ">50K").astype(int)
     df = df.drop(columns=["class"]).dropna()
@@ -151,7 +151,7 @@ def _(data_editor):
 
 @app.cell
 def _(df, mo):
-    mo.ui.data_editor(df,editable_columns=['age','education'])
+    mo.ui.data_editor(df, editable_columns=["age", "education"])
     return
 
 

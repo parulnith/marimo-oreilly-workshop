@@ -5,7 +5,7 @@
 
 import marimo
 
-__generated_with = "0.23.3"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -63,7 +63,9 @@ def _():
 
 @app.function
 def get_client(base_url="http://localhost:11434/v1", api_key="ollama"):
-    return OpenAI(base_url=base_url, api_key=api_key or os.getenv("OPENAI_API_KEY", "ollama"))
+    return OpenAI(
+        base_url=base_url, api_key=api_key or os.getenv("OPENAI_API_KEY", "ollama")
+    )
 
 
 @app.cell(hide_code=True)
@@ -94,20 +96,32 @@ def compare_two_models(client, texts, model_a, model_b):
                     temperature=0.0,
                 )
                 raw = (response.choices[0].message.content or "").strip()
-                raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+                raw = (
+                    raw.removeprefix("```json")
+                    .removeprefix("```")
+                    .removesuffix("```")
+                    .strip()
+                )
                 parsed = json.loads(raw)
-                rows.append({
-                    "text": text,
-                    "model": model,
-                    "label": parsed.get("label", "neutral"),
-                    "confidence": round(float(parsed.get("confidence", 0.5)), 3),
-                    "reason": parsed.get("reason", ""),
-                })
+                rows.append(
+                    {
+                        "text": text,
+                        "model": model,
+                        "label": parsed.get("label", "neutral"),
+                        "confidence": round(float(parsed.get("confidence", 0.5)), 3),
+                        "reason": parsed.get("reason", ""),
+                    }
+                )
             except Exception as exc:
-                rows.append({
-                    "text": text, "model": model,
-                    "label": "error", "confidence": 0.0, "reason": str(exc),
-                })
+                rows.append(
+                    {
+                        "text": text,
+                        "model": model,
+                        "label": "error",
+                        "confidence": 0.0,
+                        "reason": str(exc),
+                    }
+                )
     return pd.DataFrame(rows)
 
 
@@ -191,12 +205,14 @@ def _(args):
         rows=10,
     )
     run_btn = mo.ui.run_button(label="Classify with both models", kind="success")
-    mo.vstack([
-        base_url_input,
-        mo.hstack([model_a_input, model_b_input], justify="start"),
-        reviews_input,
-        run_btn,
-    ])
+    mo.vstack(
+        [
+            base_url_input,
+            mo.hstack([model_a_input, model_b_input], justify="start"),
+            reviews_input,
+            run_btn,
+        ]
+    )
     return base_url_input, model_a_input, model_b_input, reviews_input, run_btn
 
 
@@ -246,27 +262,45 @@ def _(model_a_input, model_b_input, results_df):
         label=f"{_model_b} verdicts",
     )
 
-    _header = mo.hstack([
-        mo.md("**Review**"),
-        mo.md(f"**{_model_a}**"),
-        mo.md(f"**{_model_b}**"),
-    ], justify="start", widths=[4, 2, 2])
+    _header = mo.hstack(
+        [
+            mo.md("**Review**"),
+            mo.md(f"**{_model_a}**"),
+            mo.md(f"**{_model_b}**"),
+        ],
+        justify="start",
+        widths=[4, 2, 2],
+    )
 
     _rows = [_header]
     for _i in range(_n):
         _a = _df_a.iloc[_i]
         _b = _df_b.iloc[_i]
-        _rows.append(mo.hstack([
-            mo.md(f"*{_a['text'][:80]}{'…' if len(_a['text']) > 80 else ''}*"),
-            mo.vstack([
-                mo.md(f"{_label_color.get(_a['label'], '')} **{_a['label']}** ({_a['confidence']:.0%})"),
-                verdicts_a.elements[_i],
-            ]),
-            mo.vstack([
-                mo.md(f"{_label_color.get(_b['label'], '')} **{_b['label']}** ({_b['confidence']:.0%})"),
-                verdicts_b.elements[_i],
-            ]),
-        ], justify="start", widths=[4, 2, 2]))
+        _rows.append(
+            mo.hstack(
+                [
+                    mo.md(f"*{_a['text'][:80]}{'…' if len(_a['text']) > 80 else ''}*"),
+                    mo.vstack(
+                        [
+                            mo.md(
+                                f"{_label_color.get(_a['label'], '')} **{_a['label']}** ({_a['confidence']:.0%})"
+                            ),
+                            verdicts_a.elements[_i],
+                        ]
+                    ),
+                    mo.vstack(
+                        [
+                            mo.md(
+                                f"{_label_color.get(_b['label'], '')} **{_b['label']}** ({_b['confidence']:.0%})"
+                            ),
+                            verdicts_b.elements[_i],
+                        ]
+                    ),
+                ],
+                justify="start",
+                widths=[4, 2, 2],
+            )
+        )
 
     mo.vstack(_rows)
     return verdicts_a, verdicts_b
@@ -291,11 +325,21 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     _acc_b = _correct_b / _n if _n else 0
     _winner = _model_a if _acc_a > _acc_b else (_model_b if _acc_b > _acc_a else "Tie")
 
-    mo.hstack([
-        mo.stat(value=f"{_acc_a:.0%}", label=f"{_model_a} accuracy", caption=f"{_correct_a}/{_n} correct"),
-        mo.stat(value=f"{_acc_b:.0%}", label=f"{_model_b} accuracy", caption=f"{_correct_b}/{_n} correct"),
-        mo.stat(value=_winner, label="Better model"),
-    ])
+    mo.hstack(
+        [
+            mo.stat(
+                value=f"{_acc_a:.0%}",
+                label=f"{_model_a} accuracy",
+                caption=f"{_correct_a}/{_n} correct",
+            ),
+            mo.stat(
+                value=f"{_acc_b:.0%}",
+                label=f"{_model_b} accuracy",
+                caption=f"{_correct_b}/{_n} correct",
+            ),
+            mo.stat(value=_winner, label="Better model"),
+        ]
+    )
     return
 
 
@@ -304,31 +348,50 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
     _model_a = model_a_input.value.strip()
     _model_b = model_b_input.value.strip()
     _n = len(verdicts_a.value)
-    _summary_df = pd.DataFrame({
-        "Model": [_model_a, _model_b],
-        "Correct": [sum(verdicts_a.value), sum(verdicts_b.value)],
-        "Incorrect": [_n - sum(verdicts_a.value), _n - sum(verdicts_b.value)],
-        "Accuracy": [
-            sum(verdicts_a.value) / _n if _n else 0,
-            sum(verdicts_b.value) / _n if _n else 0,
-        ],
-    })
-    _melted = _summary_df.melt(id_vars="Model", value_vars=["Correct", "Incorrect"], var_name="Verdict", value_name="Count")
+    _summary_df = pd.DataFrame(
+        {
+            "Model": [_model_a, _model_b],
+            "Correct": [sum(verdicts_a.value), sum(verdicts_b.value)],
+            "Incorrect": [_n - sum(verdicts_a.value), _n - sum(verdicts_b.value)],
+            "Accuracy": [
+                sum(verdicts_a.value) / _n if _n else 0,
+                sum(verdicts_b.value) / _n if _n else 0,
+            ],
+        }
+    )
+    _melted = _summary_df.melt(
+        id_vars="Model",
+        value_vars=["Correct", "Incorrect"],
+        var_name="Verdict",
+        value_name="Count",
+    )
     _chart = (
-        alt.Chart(_melted).mark_bar()
+        alt.Chart(_melted)
+        .mark_bar()
         .encode(
             x=alt.X("Model:N", title=None, axis=alt.Axis(labelAngle=0)),
             y=alt.Y("Count:Q", title="Reviews"),
-            color=alt.Color("Verdict:N", scale=alt.Scale(domain=["Correct", "Incorrect"], range=["#55A868", "#C44E52"])),
+            color=alt.Color(
+                "Verdict:N",
+                scale=alt.Scale(
+                    domain=["Correct", "Incorrect"], range=["#55A868", "#C44E52"]
+                ),
+            ),
             tooltip=["Model:N", "Verdict:N", "Count:Q"],
         )
         .properties(title="Correct vs Incorrect by Model", width=300, height=240)
     )
     _acc_chart = (
-        alt.Chart(_summary_df).mark_bar()
+        alt.Chart(_summary_df)
+        .mark_bar()
         .encode(
             x=alt.X("Model:N", title=None, axis=alt.Axis(labelAngle=0)),
-            y=alt.Y("Accuracy:Q", title="Accuracy", scale=alt.Scale(domain=[0, 1]), axis=alt.Axis(format=".0%")),
+            y=alt.Y(
+                "Accuracy:Q",
+                title="Accuracy",
+                scale=alt.Scale(domain=[0, 1]),
+                axis=alt.Axis(format=".0%"),
+            ),
             color=alt.Color("Model:N", legend=None),
             tooltip=["Model:N", alt.Tooltip("Accuracy:Q", format=".0%")],
         )
@@ -341,7 +404,9 @@ def _(model_a_input, model_b_input, verdicts_a, verdicts_b):
 @app.function
 def run_headless(argv):
     """Parse CLI args, run both models, and optionally write CSV output."""
-    parser = argparse.ArgumentParser(description="Compare two Ollama models on a set of reviews.")
+    parser = argparse.ArgumentParser(
+        description="Compare two Ollama models on a set of reviews."
+    )
     parser.add_argument("--model-a", default="gemma3:1b")
     parser.add_argument("--model-b", default="qwen2.5:0.5b")
     parser.add_argument("--base-url", default="http://localhost:11434/v1")
@@ -363,6 +428,6 @@ if __name__ == "__main__":
 
     if "--" in sys.argv:
         sep = sys.argv.index("--")
-        run_headless(sys.argv[sep + 1:])
+        run_headless(sys.argv[sep + 1 :])
     else:
         app.run()
