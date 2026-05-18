@@ -13,7 +13,7 @@
 
 import marimo
 
-__generated_with = "0.23.5"
+__generated_with = "0.23.6"
 app = marimo.App(width="medium")
 
 
@@ -203,11 +203,6 @@ def _(mo):
     mo.md("""
     ## 2. Inline autocompletion
     """)
-    return
-
-
-@app.cell
-def _():
     return
 
 
