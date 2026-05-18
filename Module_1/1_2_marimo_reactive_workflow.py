@@ -44,7 +44,7 @@ def _():
 
 
 @app.function
-def compound_interest(principal, rate, years):
+def ci(principal, rate, years):
     values = [principal]
     for _year in range(1, years + 1):
         values.append(values[-1] * (1 + rate))
@@ -52,10 +52,10 @@ def compound_interest(principal, rate, years):
 
 
 @app.cell
-def _():
+def _(compound_interest):
     principal = 1000
     rate = 0.07
-    years = 20
+    years = 10
     growth = compound_interest(principal, rate, years)
     return growth, principal, rate, years
 
@@ -103,7 +103,7 @@ def _():
 
 
 @app.cell
-def _(mo, pd, principal, rates, years):
+def _(compound_interest, mo, pd, principal, rates, years):
     rows = []
     for comparison_rate in rates:
         scenario_growth = compound_interest(principal, comparison_rate, years)
@@ -116,12 +116,6 @@ def _(mo, pd, principal, rates, years):
         )
     summary_df = pd.DataFrame(rows)
     mo.plain(summary_df)
-    return
-
-
-@app.cell
-def _():
-    a = 15
     return
 
 
@@ -138,6 +132,47 @@ def _(mo):
     marimo convert notebook.ipynb -o notebook.py
     ```
     """)
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _(mo):
+    params = mo.cli_args()
+    params
+    return
+
+
+@app.cell
+def _():
+    a = 1
+    return (a,)
+
+
+@app.cell
+def _():
+    b = 2
+    return (b,)
+
+
+@app.cell
+def _(a, b):
+    c  = a+b
+    return (c,)
+
+
+@app.cell
+def _(c):
+    c
+    return
+
+
+@app.cell
+def _():
     return
 
 

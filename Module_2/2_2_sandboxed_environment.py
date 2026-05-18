@@ -1,7 +1,8 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "marimo",
+#     "marimo>=0.23.3",
+#     "mcp==1.27.1",
 #     "pandas==2.3.3",
 #     "scikit-learn==1.8.0",
 # ]
@@ -48,7 +49,6 @@ def _(mo):
 
 @app.cell
 def _(sklearn, sys):
-
     from sklearn.calibration import CalibratedClassifierCV
     from sklearn.datasets import make_classification
     from sklearn.model_selection import train_test_split
